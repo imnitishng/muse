@@ -1,4 +1,5 @@
 import spotipy
+import random
 from spotipy.oauth2 import SpotifyClientCredentials
 
 from configs import CLIENT_ID, CLIENT_SECRET
@@ -12,6 +13,7 @@ class Song:
         self.search_term = None
         self.trackInFocusID = None
         self.trackArtistID = None
+        self.recommendedTracks = []
 
         self.searchResultsObj = None
         self.trackInFocusObj = None
@@ -99,13 +101,33 @@ class Song:
                 song_name = song.get('name', 'NULL')
                 if song_name not in self.artistTracksMapObj:
                     self.artistTracksMapObj[song_name] = song
+                    self.recommendedTracks.append(
+                        song_name + ' - ' + self.trackArtistObj.get('name')
+                    )
 
     def get_song_recommendations(self):
         """
         Get song recommendations for a single song
         """
 
-        
+        response = self.client.recommendations(
+            seed_tracks=[self.trackInFocusID],
+            limit=50,
+            max_speechiness=0.60)
+
+        songs = response.get('tracks')
+        for song in songs:
+            song_name = song.get('name', 'NULL')
+            artist_name = song.get('artists', 'NULL')[0].get('name', 'NULL')
+            self.recommendedTracks.append(
+                song_name + ' - ' + artist_name
+            )
+
+    def save_recommends_to_file(self):
+        filename =  'data/' + self.search_term + str(random.randint(1, 10)) + '.txt'
+        with open(filename, 'w') as f:
+            for track in self.recommendedTracks:        
+                print(track, file=f) 
 
 def main():
 
@@ -116,7 +138,10 @@ def main():
     # SongEntity.get_audio_features()
     SongEntity.get_artist_albums()
     SongEntity.get_all_artist_tracks()
-    SongEntity.recommendations()
+    SongEntity.get_song_recommendations()
+
+    # Saving
+    SongEntity.save_recommends_to_file()
 
     print('ok boomer')
 
