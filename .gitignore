@@ -1,5 +1,8 @@
 __pycache__/
 .vscode/
 data/
+utils_local/
 
 configs.py
+lyrics.txt
+songs.txt

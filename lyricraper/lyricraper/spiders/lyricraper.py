@@ -9,6 +9,7 @@ class LyricraperSpider(scrapy.Spider):
     name = "lyricraper"
     
     def __init__(self, filename='',  **kwargs):
+        self.filename = filename
         self.songs = []
         self.start_urls = []
 
@@ -50,10 +51,15 @@ class LyricraperSpider(scrapy.Spider):
         
         lyrics = response.xpath('//span[@class="lyrics__content__ok"]/text()').getall()
         if not lyrics:
-            lyrics = response.xpath('//span[@class="lyrics__content__error"]/text()').getall()        
-        lyrics = '\n'.join(lyrics)
+            lyrics = response.xpath('//span[@class="lyrics__content__error"]/text()').getall()                
+        
+        if lyrics:
+            lyrics = '\n'.join(lyrics)
+        else:
+            lyrics = "NULL"
         
         data['lyrics'] = lyrics
+        data['parent'] = self.filename
         data['type'] = 'lyrics'
 
         yield data

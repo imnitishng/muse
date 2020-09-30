@@ -30,10 +30,10 @@ class MySQLPipeline(object):
         if isinstance(item, dict) and item['type'] == 'lyrics':
             del item['type']
             
-            data = (item['song'], item['artist'], item['lyrics'])
+            data = (item['song'], item['artist'], item['lyrics'], item['parent'])
             query = """INSERT INTO lyrics 
-                    (name, artist, lyrics) 
-                    VALUES (%s, %s, %s)"""    
+                    (name, artist, lyrics, parent) 
+                    VALUES (%s, %s, %s, %s)"""    
 
             self.cursor.execute(query, data)
             return item
