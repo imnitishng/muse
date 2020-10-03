@@ -18,7 +18,7 @@ NEWSPIDER_MODULE = 'lyricraper.spiders'
 
 # Obey robots.txt rules
 ROBOTSTXT_OBEY = False
-LOG_LEVEL = 'INFO'
+LOG_LEVEL = 'DEBUG'
 
 # Configure maximum concurrent requests performed by Scrapy (default: 16)
 #CONCURRENT_REQUESTS = 32
@@ -45,9 +45,9 @@ LOG_LEVEL = 'INFO'
 
 # Enable or disable spider middlewares
 # See https://docs.scrapy.org/en/latest/topics/spider-middleware.html
-#SPIDER_MIDDLEWARES = {
-#    'lyricraper.middlewares.LyricraperSpiderMiddleware': 543,
-#}
+SPIDER_MIDDLEWARES = {
+   'lyricraper.middlewares.MusixmatchCaptchMiddleware': 100,
+}
 
 # Enable or disable downloader middlewares
 # See https://docs.scrapy.org/en/latest/topics/downloader-middleware.html
