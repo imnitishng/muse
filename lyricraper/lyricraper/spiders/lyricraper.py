@@ -6,7 +6,7 @@ import re
 
 class LyricraperSpider(scrapy.Spider):
     # Scraper name
-    name = "lyricraper"
+    name = "lyricraper_mxm"
     
     def __init__(self, filename='',  **kwargs):
         self.filename = filename
