@@ -1,4 +1,5 @@
 from itemadapter import ItemAdapter
+import os
 
 import mysql.connector
 
@@ -39,5 +40,9 @@ class MySQLPipeline(object):
             return item
 
     def close_spider(self, spider):
+        # Remove file if we have already scraped from MXM
+        if spider.name == 'lyricraper_mxm':
+            os.remove("to_mxm.txt")
+
         self.cnx.commit()
         self.cnx.close()

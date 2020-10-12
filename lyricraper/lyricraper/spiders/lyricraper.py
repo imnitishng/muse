@@ -33,21 +33,27 @@ class LyricraperSpider(scrapy.Spider):
         Extract track names from search and send forward for scraping
         """
         track_urls = response.xpath('//div[@class="media-card-text"]/h2/a/@href').getall()
+        
+        # Build current track data        
+        search_metadata = urllib.parse.unquote(response.url.split('/')[-1]).replace('\n', '').split('-')
+        artist_name = search_metadata[-1].strip()
+        song_name = ''.join(search_metadata[0:len(search_metadata)-1]).strip()
 
         if track_urls:
             # First song is all we need, so we follow that link
             track_url = response.urljoin(track_urls[0])
-            yield response.follow(track_url, callback=self.parse_lyrics)
+            yield response.follow(track_url, 
+                callback=self.parse_lyrics,
+                cb_kwargs=dict(artist=artist_name, song=song_name))
 
-    def parse_lyrics(self, response):
+    def parse_lyrics(self, response, artist, song):
         """
         Parse song lyrics from a track page
         """
         data = {}
-        artist, songname = response.url.split('/')[4:]
         
         data['artist'] = ' '.join(re.findall('([\w]\w+)', artist))
-        data['song'] = ' '.join(re.findall('([\w]\w+)', songname))
+        data['song'] = ' '.join(re.findall('([\w]\w+)', song))
         
         lyrics = response.xpath('//span[@class="lyrics__content__ok"]/text()').getall()
         if not lyrics:

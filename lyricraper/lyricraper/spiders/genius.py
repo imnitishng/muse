@@ -4,6 +4,8 @@ import csv, os, json
 import mysql.connector
 import re
 
+from ..spider_utils import defaulters_to_file
+
 class LyricraperSpider(scrapy.Spider):
     # Scraper name
     name = "lyricraper_genius"
@@ -46,6 +48,11 @@ class LyricraperSpider(scrapy.Spider):
         """        
         response_json = json.loads(response.text)
         response_section = response_json.get('response', None).get('sections', None)
+
+        # Create song metadata for DB
+        search_metadata = response.url.split('=')[-1].replace('+', ' ').split('-')
+        artist_name = search_metadata[-1].strip()
+        song_name = ''.join(search_metadata[0:len(search_metadata)-1]).strip()
         
         if response_section:
             top_results, song_results = response_section[0], response_section[1]                        
@@ -53,16 +60,12 @@ class LyricraperSpider(scrapy.Spider):
                 # We consider the first search result
                 try:
                     first_hit = song_results.get('hits', None)[0]
-                except:
-                    # TODO
-                    print('aaa')
-                track_url = first_hit.get('result', None).get('url', None)
-
+                    track_url = first_hit.get('result', None).get('url', None)
+                except:                    
+                    defaulters_to_file(artist_name, song_name)
+                    track_url = None    
+                
         if track_url:
-            search_metadata = response.url.split('=')[-1].replace('+', ' ').split('-')
-            artist_name = search_metadata[-1].strip()
-            song_name = ''.join(search_metadata[0:len(search_metadata)-1]).strip()
-
             # First song is all we need, so we follow that link
             yield response.follow(track_url, 
                 callback=self.parse_lyrics,
