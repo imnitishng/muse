@@ -25,8 +25,9 @@ class LyricraperSpider(scrapy.Spider):
         super().__init__(**kwargs)
 
     def songs_from_file(self, filename):
-        with open(filename, 'r') as f:
-            self.songs = f.readlines()
+        if os.path.exists(filename):
+            with open(filename, 'r') as f:
+                self.songs = f.readlines()
 
     def parse(self, response):
         """

@@ -83,20 +83,16 @@ class LyricraperSpider(scrapy.Spider):
         raw_lyrics = response.xpath('//div[@class="lyrics"]/p').get()                                
         
         # Try the different XPATH for lyrics
-        bad_formatting = 0
         if not raw_lyrics:
             raw_lyrics = response.xpath(
                 '//div[@class="Lyrics__Container-sc-1ynbvzw-2 jgQsqn"]').getall()
             raw_lyrics = '\n'.join(raw_lyrics)
-            bad_formatting = 1
-
         
         if raw_lyrics:
-            # Remove HTML tags from lyrics
+            # Remove HTML tags and clean lyrics
             reg_exp_HTML = '<[^>]*>'
             lyrics = re.sub(reg_exp_HTML, '\n', raw_lyrics)
-            if bad_formatting:
-                lyrics = self.clean_spacing(lyrics)
+            lyrics = self.clean_spacing(lyrics)
         else:
             lyrics = "NULL"
         
