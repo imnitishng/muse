@@ -12,7 +12,7 @@ class Endpoint(models.Model):
     '''
     name = models.CharField(max_length=128)
     owner = models.CharField(max_length=128)
-    created_at = models.DateTimeField(auto_now_add=False, blank=False)
+    created_at = models.DateTimeField(auto_now_add=True, blank=False)
 
 
 class MLAlgorithm(models.Model):
@@ -89,3 +89,20 @@ class NLPRequest(models.Model):
     feedback = models.CharField(max_length=10000, blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True, blank=True)
     parent_mlalgorithm = models.ForeignKey(MLAlgorithm, on_delete=models.CASCADE)
+
+
+class SongQueryObject(models.Model):
+    '''
+    The SongQueryObject will keep information about the song selected by user.
+    This is the parent based on which all the recommendations will be made.
+
+    Attributes:
+        song_name: Name of the song
+        artist_name: Name of the song artist
+        recommendations: The spotify recommendations for this song in JSON format
+        created_at: The date when object was created
+    '''
+    song_name = models.CharField(max_length=200)
+    artist_name = models.CharField(max_length=200)
+    recommendations = models.CharField(max_length=10000)
+    created_at = models.DateTimeField(auto_now_add=True, blank=True)

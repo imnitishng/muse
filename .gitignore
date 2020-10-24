@@ -6,3 +6,4 @@ utils_local/
 configs.py
 lyrics.txt
 songs.txt
+musebackendserver/muse/apps/endpoints/congfigs.py

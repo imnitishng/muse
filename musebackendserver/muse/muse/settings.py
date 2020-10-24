@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     # apps
     'apps.endpoints',
+    'apps.nlp',
     # rest framework
     'rest_framework' 
 ]
