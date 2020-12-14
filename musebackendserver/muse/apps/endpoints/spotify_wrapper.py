@@ -1,10 +1,12 @@
 import spotipy
 import random
+import os
 from spotipy.oauth2 import SpotifyClientCredentials
 
 from .congfigs import CLIENT_ID, CLIENT_SECRET
+from ..endpoints.models import Songs
 
-class Song:
+class SpotifySong:
     """
     Object for main query by user
     """
@@ -14,6 +16,7 @@ class Song:
         self.trackInFocusID = None
         self.trackArtistID = None
         self.recommendedTracks = []
+        self.recommedation_track_ids = []
 
         self.searchResultsObj = None
         self.trackInFocusObj = None
@@ -114,15 +117,69 @@ class Song:
             max_speechiness=0.60)
 
         songs = response.get('tracks')
+        self.store_songs_to_model(songs)
+
+    def store_songs_to_model(self, songs):
         for song in songs:
-            song_name = song.get('name', 'NULL')
-            artist_name = song.get('artists', 'NULL')[0].get('name', 'NULL')
-            self.recommendedTracks.append(
-                song_name + ' - ' + artist_name
-            )
+            try:
+                spotify_id = song.get('id', None)
+                title = song.get('name', 'NULL')
+                artists = song.get('artists', 'NULL')
+                if not title or not artists:
+                    continue
+                track_url = song.get('external_urls', None)
+                if track_url:
+                    track_url = track_url.get('spotify', None)
+
+                preview_url = song.get('preview_url', 'NULL')
+                
+                artist_info = artists[0].get('href', 'NULL')
+                for i in range(len(artists)):
+                    artists[i] = artists[i].get('name', 'NULL')
+
+                main_artist = artists[0]
+
+                album = song.get('album', None)
+                if album:
+                    album_name = album.get('name', 'NULL')
+                    album_arts = album.get('images', None)
+                    if album_arts:
+                        if len(album_arts) > 2:
+                            album_art_lg = album_arts[0].get('url')
+                            album_art_md = album_arts[1].get('url')
+                        else:
+                            album_art_lg = album_arts[0].get('url')
+                            album_art_md = album_arts[0].get('url')
+                else:
+                    album_art_lg, album_art_md = None, None
+                
+                # Save songs to model
+                songToSave = Songs(
+                    title=title,
+                    main_artist=main_artist,
+                    artist_info=artist_info,
+                    all_artists=artists,
+                    album=album_name,
+                    spotify_id=spotify_id,
+                    album_art_lg=album_art_lg,
+                    album_art_md=album_art_md,
+                    track_url=track_url,
+                    preview_url=preview_url
+                )
+                songToSave.save()
+                
+                # Save recomendations to object to return from API
+                self.recommendedTracks.append(
+                    title + ' - ' + main_artist
+                )
+
+                # Save recommended songs for lyrics fetch
+                self.recommedation_track_ids.append(songToSave.id)
+            except:
+                continue
 
     def save_recommends_to_file(self):
-        filename =  'data/' + self.search_term + str(random.randint(1, 10)) + '.txt'
+        filename =  os.getcwd() + '/data_storage/songs.txt'
         with open(filename, 'w') as f:
             for track in self.recommendedTracks:        
                 print(track, file=f) 

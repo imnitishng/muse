@@ -12,7 +12,7 @@ class LyricraperSpider(scrapy.Spider):
     # Scraper name
     name = "lyricraper_genius"
     
-    def __init__(self, user_query_id='', **kwargs):
+    def __init__(self, user_query='', **kwargs):
         self.songs = []
         self.song_ids = []
         self.urls_to_scrape = []

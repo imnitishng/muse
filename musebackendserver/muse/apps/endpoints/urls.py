@@ -3,7 +3,7 @@ from rest_framework.routers import DefaultRouter
 
 from .views import (EndpointViewSet, MLAlgorithmViewSet, 
                     AlgorithmStatusViewSet, NLPRequestViewSet, PredictView,
-                    RecommendationsView)
+                    RecommendationsView, LyricsView)
 
 router = DefaultRouter(trailing_slash=False)
 router.register(r"endpoints", EndpointViewSet, basename="endpoints")
@@ -19,5 +19,8 @@ urlpatterns = [
     ),
     url(
         r"^api/v1/sp_recommedations", RecommendationsView.as_view(), name="spotify_recommendations"
+    ),
+    url(
+        r"^api/v1/get_lyrics", LyricsView.as_view(), name="get_lyrics"
     ),
 ]

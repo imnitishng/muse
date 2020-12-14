@@ -3,23 +3,30 @@ import subprocess
 from twisted.internet import reactor, defer
 from scrapy.crawler import CrawlerRunner
 from scrapy.utils.log import configure_logging
+from scrapyd_api import ScrapydAPI
 
 from .lyricraper.spiders import lyricraper, genius
+from .lyricraper.spider_utils import getSongIDsToScrape1
 from scrapy.utils.project import get_project_settings
 
-def run_spiders():
+from apps.endpoints.models import Songs, SongQueryObject
+
+def run_spiders(query):
 
     configure_logging()
     runner = CrawlerRunner(get_project_settings())
 
-    filename = './data_storage/songs.txt'
-    filename_mxm = 'to_mxm.txt'
+    query_id = query.id
+    retcode = getSongIDsToScrape1(query)
 
-    @defer.inlineCallbacks
-    def crawl(filename):
-        yield runner.crawl(genius.LyricraperSpider, filename=filename)
-        yield runner.crawl(lyricraper.LyricraperSpider, filename=filename_mxm)
-        reactor.stop()
+    # @defer.inlineCallbacks
+    # def crawl(query):
+    #     yield runner.crawl(genius.LyricraperSpider, user_query=query)
+        # yield runner.crawl(lyricraper.LyricraperSpider, user_query=query)
+        # reactor.stop()
 
-    crawl(filename)
-    reactor.run()
+    if retcode:
+        crawl(query_id)
+        reactor.run()
+
+def crawl(query_id):

@@ -6,11 +6,13 @@ from rest_framework import views, status
 from rest_framework.response import Response
 
 from muse.wsgi import registry
-from .spotify_wrapper import Song
+from .spotify_wrapper import SpotifySong
 from .models import (Endpoint, MLAlgorithm, 
-                    SongQueryObject, AlgorithmStatus, NLPRequest)
+                    AlgorithmStatus, NLPRequest,
+                    SongQueryObject, QueryStatus, Songs)
 from .serializers import (EndpointSerializer, MLAlgorithmSerializer, 
                                 AlgorithmStatusSerializer, NLPRequestSerializer)
+from spiders.lyricraper.spider_main import run_spiders
 
 
 class EndpointViewSet(mixins.RetrieveModelMixin, mixins.ListModelMixin, viewsets.GenericViewSet):    
@@ -106,29 +108,33 @@ class RecommendationsView(views.APIView):
     
     def post(self, request, format=None):
 
-        query_song_name = self.request.data.get("song", "NULL")
-        query_artist_name = self.request.data.get("artist", "NULL")
+        query_song_name = self.request.data.get("song", None)
+        query_artist_name = self.request.data.get("artist", None)
 
-        SongEntity = Song()
+        SongEntity = SpotifySong()
         SongEntity.search_track(query_song_name, query_artist_name)
         SongEntity.initialize_track(0)
         # SongEntity.get_audio_features()
-        SongEntity.get_artist_albums()
-        SongEntity.get_all_artist_tracks()
+        # SongEntity.get_artist_albums()
+        # SongEntity.get_all_artist_tracks()
         SongEntity.get_song_recommendations()
 
-        recommendations = SongEntity.recommendedTracks        
+        recommendations = SongEntity.recommendedTracks
+        recommendation_ids = str(SongEntity.recommedation_track_ids)[1:-1]
         song_query_object = SongQueryObject(
             song_name = query_song_name,
             artist_name = query_artist_name,
-            recommendations = recommendations
+            recommendations = recommendations,
+            recommendation_ids = recommendation_ids
         )
         song_query_object.save()
+        SongEntity.save_recommends_to_file()
 
         recommendations_response = {
             "status": "OK",
-            "object_id": song_query_object.id,
-            "recommendations": SongEntity.recommendedTracks
+            "query_id": song_query_object.id,
+            "recommendations": SongEntity.recommendedTracks,
+            "recommendation_ids": SongEntity.recommedation_track_ids
         }
         return Response(recommendations_response)
 
@@ -136,4 +142,43 @@ class RecommendationsView(views.APIView):
 class LyricsView(views.APIView):
 
     def post(self, request, format=None):
-        pass        
+
+        query_id = self.request.data.get("query_id", None)
+        Query = SongQueryObject.objects.get(id=query_id)
+        queried_song_ids = Query.recommendation_ids
+
+        # Clone query info to process and use later
+        cloned_query = QueryStatus(
+            query_object=Query,
+            songids_to_process=queried_song_ids
+        )
+        cloned_query.save()
+
+        run_spiders(cloned_query)
+
+        song_requested_ids = Query.recommendation_ids.split(',')
+        if song_requested_ids:
+            QueriedSongsDict = Songs.objects.in_bulk(song_requested_ids)
+            
+            response_song_object = []
+            for song_id, song in QueriedSongsDict.items():
+                single_song_response = {
+                    'title': song.title,
+                    'artists': song.all_artists,
+                    'lyrics': song.lyrics
+                }
+                response_song_object.append(single_song_response)
+
+            lyrics_response = {
+                'status': 'OK',
+                'query_id': query_id,
+                'songs': response_song_object
+            }
+
+            return Response(lyrics_response)
+        else:
+            fail_response = {
+                'status': 'NOT_OK',
+                'query_id': query_id,
+                'songs': 'None found in query'
+            }

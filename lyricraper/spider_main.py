@@ -1,29 +1,23 @@
-import os
-import subprocess
-from twisted.internet import reactor, defer
-from scrapy.crawler import CrawlerRunner
-from scrapy.utils.log import configure_logging
+Go here
+https://www.proxysite.com/
 
-from lyricraper.spiders import lyricraper, genius
-from scrapy.utils.project import get_project_settings
+Yaha pe enter
+https://1337x.to/
 
-def main():
+Search movie
 
-    configure_logging()
-    runner = CrawlerRunner(get_project_settings())
+Select the one you want to download (jyada neeche gyi list me to nahi kuch milega even though the title says so)
+(stick to top 10 results only)
 
-    filename = '../data/bitch boss doja cat2' + '.txt'
-    filename_mxm = 'to_mxm.txt'
+On top of the page youll see a URL between [Hide] and [Go] buttons
+Copy this URL
 
-    @defer.inlineCallbacks
-    def crawl(filename):
-        yield runner.crawl(genius.LyricraperSpider, filename=filename)
-        yield runner.crawl(lyricraper.LyricraperSpider, filename=filename_mxm)
-        reactor.stop()
+Now go here
+https://www.seedr.cc/
+Create account if you don't have one, once done Log in
 
-    crawl(filename)
-    reactor.run()
+Paste copied URL inside seedr
 
-                
-if __name__ == '__main__':
-    main()
+Download start ho jaegi
+
+Once downloaded open the folder that is created, download the video file jo chahye
