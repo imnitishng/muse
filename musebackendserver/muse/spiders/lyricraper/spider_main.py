@@ -16,17 +16,18 @@ def run_spiders(query):
     configure_logging()
     runner = CrawlerRunner(get_project_settings())
 
-    query_id = query.id
+    query_id = query.query_object.id
     retcode = getSongIDsToScrape1(query)
 
-    # @defer.inlineCallbacks
-    # def crawl(query):
-    #     yield runner.crawl(genius.LyricraperSpider, user_query=query)
-        # yield runner.crawl(lyricraper.LyricraperSpider, user_query=query)
-        # reactor.stop()
-
     if retcode:
-        crawl(query_id)
-        reactor.run()
+        spider_job_id = crawl(query_id)
+        return spider_job_id
 
 def crawl(query_id):
+
+    scrapyd = get_spider_instance()
+    spider_job_id = scrapyd.schedule('lyricraper', 'lyricraper_genius', user_query_id=query_id)
+    return spider_job_id
+
+def get_spider_instance():
+    return ScrapydAPI('http://localhost:6800')
