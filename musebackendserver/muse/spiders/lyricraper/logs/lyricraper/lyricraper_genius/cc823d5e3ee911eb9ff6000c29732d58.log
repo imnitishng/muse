@@ -1,0 +1,32 @@
+2020-12-15 15:25:47 [scrapy.utils.log] INFO: Scrapy 2.3.0 started (bot: lyricraper)
+2020-12-15 15:25:47 [scrapy.utils.log] INFO: Versions: lxml 4.5.2.0, libxml2 2.9.10, cssselect 1.1.0, parsel 1.6.0, w3lib 1.22.0, Twisted 20.3.0, Python 3.6.9 (default, Oct  8 2020, 12:12:24) - [GCC 8.4.0], pyOpenSSL 19.1.0 (OpenSSL 1.1.1h  22 Sep 2020), cryptography 3.1.1, Platform Linux-5.4.0-58-generic-x86_64-with-Ubuntu-18.04-bionic
+2020-12-15 15:25:47 [scrapy.utils.log] DEBUG: Using reactor: twisted.internet.epollreactor.EPollReactor
+2020-12-15 15:25:47 [scrapy.crawler] INFO: Overridden settings:
+{'BOT_NAME': 'lyricraper',
+ 'LOG_FILE': 'logs/lyricraper/lyricraper_genius/cc823d5e3ee911eb9ff6000c29732d58.log',
+ 'NEWSPIDER_MODULE': 'lyricraper.spiders',
+ 'SPIDER_MODULES': ['lyricraper.spiders']}
+2020-12-15 15:25:47 [scrapy.extensions.telnet] INFO: Telnet Password: edefdc8eb4b2dd9c
+2020-12-15 15:25:47 [scrapy.middleware] INFO: Enabled extensions:
+['scrapy.extensions.corestats.CoreStats',
+ 'scrapy.extensions.telnet.TelnetConsole',
+ 'scrapy.extensions.memusage.MemoryUsage',
+ 'scrapy.extensions.logstats.LogStats']
+2020-12-15 15:25:47 [twisted] CRITICAL: Unhandled error in Deferred:
+2020-12-15 15:25:47 [twisted] CRITICAL: 
+Traceback (most recent call last):
+  File "/home/nitish/venvs/muse/lib/python3.6/site-packages/twisted/internet/defer.py", line 1418, in _inlineCallbacks
+    result = g.send(result)
+  File "/home/nitish/venvs/muse/lib/python3.6/site-packages/scrapy/crawler.py", line 86, in crawl
+    self.spider = self._create_spider(*args, **kwargs)
+  File "/home/nitish/venvs/muse/lib/python3.6/site-packages/scrapy/crawler.py", line 98, in _create_spider
+    return self.spidercls.from_crawler(self, *args, **kwargs)
+  File "/home/nitish/venvs/muse/lib/python3.6/site-packages/scrapy/spiders/__init__.py", line 49, in from_crawler
+    spider = cls(*args, **kwargs)
+  File "/home/nitish/Projects/muse/musebackendserver/muse/spiders/lyricraper/lyricraper/spiders/genius.py", line 22, in __init__
+    self.songs_from_model()
+  File "/home/nitish/Projects/muse/musebackendserver/muse/spiders/lyricraper/lyricraper/spiders/genius.py", line 111, in songs_from_model
+    self.logger.warning(f'To process: {self.UserQueryObject.objects.all()[0]}, {self.UserQueryObject.query_object}')
+  File "/home/nitish/venvs/muse/lib/python3.6/site-packages/django/db/models/manager.py", line 179, in __get__
+    raise AttributeError("Manager isn't accessible via %s instances" % cls.__name__)
+AttributeError: Manager isn't accessible via QueryStatus instances

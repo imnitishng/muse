@@ -139,7 +139,7 @@ class RecommendationsView(views.APIView):
         return Response(recommendations_response)
 
 
-class LyricsView(views.APIView):
+class SpidersView(views.APIView):
 
     def post(self, request, format=None):
 
@@ -154,12 +154,32 @@ class LyricsView(views.APIView):
         )
         cloned_query.save()
 
-        run_spiders(cloned_query)
+        JobID = run_spiders(cloned_query)
+
+        if JobID:
+            spider_job_response = {
+                'status': 'Spider Running',
+                'job_id': JobID
+            }
+        else:
+            spider_job_response = {
+                'status': 'Spider failed to run',
+                'job_id': JobID
+            }
+        return Response(spider_job_response)
+
+
+class LyricsView(views.APIView):
+
+    def post(self, request, format=None):
+
+        query_id = self.request.data.get("query_id", None)
+        Query = SongQueryObject.objects.get(id=query_id)
+        queried_song_ids = Query.recommendation_ids
 
         song_requested_ids = Query.recommendation_ids.split(',')
         if song_requested_ids:
-            QueriedSongsDict = Songs.objects.in_bulk(song_requested_ids)
-            
+            QueriedSongsDict = Songs.objects.in_bulk(song_requested_ids)            
             response_song_object = []
             for song_id, song in QueriedSongsDict.items():
                 single_song_response = {
@@ -174,7 +194,6 @@ class LyricsView(views.APIView):
                 'query_id': query_id,
                 'songs': response_song_object
             }
-
             return Response(lyrics_response)
         else:
             fail_response = {
@@ -182,3 +201,5 @@ class LyricsView(views.APIView):
                 'query_id': query_id,
                 'songs': 'None found in query'
             }
+
+            return Response(fail_response)

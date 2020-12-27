@@ -12,12 +12,13 @@ class LyricraperSpider(scrapy.Spider):
     # Scraper name
     name = "lyricraper_genius"
     
-    def __init__(self, user_query='', **kwargs):
+    def __init__(self, user_query_id='', **kwargs):
         self.songs = []
         self.song_ids = []
         self.urls_to_scrape = []
         
-        self.UserQueryObject = user_query
+        original_query = SongQueryObject.objects.get(pk=user_query_id)
+        self.UserQueryObject = QueryStatus.objects.get(pk=original_query)
         self.songs_from_model()
         
         # Parse songs to start urls for scraping
@@ -107,7 +108,8 @@ class LyricraperSpider(scrapy.Spider):
         Extract songs from django model `Song` based on the query
         recieved by the user.
         '''
-        if len(self.UserQueryObject.songids_to_process) > 0:
+        self.logger.warning(f"To process: {QueryStatus.objects.all().values('songids_to_process', 'query_object')}")
+        if self.UserQueryObject.songids_to_process:
             requested_songIDs = self.UserQueryObject.songids_to_process.split(',')
             requested_songsDict = Songs.objects.in_bulk(requested_songIDs)
             
