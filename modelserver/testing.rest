@@ -1,0 +1,10 @@
+POST http://127.0.0.1:5000/embeddings
+Content-Type: application/json
+
+{
+  "data": [
+    "elephant is an animal",
+    "elephant has big tusk",
+    "elephant is not a rhino which is an animal"
+    ]
+}
