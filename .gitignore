@@ -1,8 +1,11 @@
+# DIRs
 __pycache__/
 .vscode/
 data/
 utils_local/
+muse-frontend/node_modules
 
+# Files
 configs.py
 lyrics.txt
 songs.txt
