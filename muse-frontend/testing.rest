@@ -1,0 +1,22 @@
+# Get access_token
+# POST https://accounts.spotify.com/api/token
+# Content-Type: application/x-www-form-urlencoded 
+
+# {
+#     "client_id": "bd6a887dce7247ecb570fda88090afd8",
+#     "client_secret": "00451bcde331429f948eeba32c432055",
+#     "code": "AQBi2IP37YaYK4j9dwKzEsqO30lwU4OFLfIApNQmP3WwofYfCka520bACbTRVxjqWLYuuWBKypOi4Fc0lBrB2hoV7LFyFzhFYYCBhZYQS-y2yxHgrx9Qy6OIuAevq_RwOzBevLl2YdbK4gkFpa9oQqgR8gYreeiCVHuTjtyC7lZKWfTMFDLMZCFyOCCtlAAwBlQ9k8lRP-sSVanROqaRSHfdjgc",
+#     "redirect_uri": "https://example.com/callback",
+#     "grant_type": "user-read-private user-read-email authorization_code"
+# }
+
+POST https://accounts.spotify.com/api/token
+Content-Type: application/x-www-form-urlencoded 
+
+{
+    "grant_type": "client_credentials",
+    "refresh_token": "AQBi2IP37YaYK4j9dwKzEsqO30lwU4OFLfIApNQmP3WwofYfCka520bACbTRVxjqWLYuuWBKypOi4Fc0lBrB2hoV7LFyFzhFYYCBhZYQS-y2yxHgrx9Qy6OIuAevq_RwOzBevLl2YdbK4gkFpa9oQqgR8gYreeiCVHuTjtyC7lZKWfTMFDLMZCFyOCCtlAAwBlQ9k8lRP-sSVanROqaRSHfdjgc"
+}
+
+# Get auth token
+# GET https://accounts.spotify.com/authorize?client_id=bd6a887dce7247ecb570fda88090afd8&response_type=code&redirect_uri=https%3A%2F%2Fexample.com%2Fcallback&scope=user-read-private%20user-read-email&state=34fFs29kd09

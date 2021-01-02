@@ -4,6 +4,9 @@ __pycache__/
 data/
 utils_local/
 muse-frontend/node_modules
+logs/
+dbs/
+eggs/
 
 # Files
 configs.py
