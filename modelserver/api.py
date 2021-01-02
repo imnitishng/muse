@@ -27,9 +27,12 @@ def home():
     embeddings = embeddings.tolist()
     corr = corr.tolist()
 
-    return jsonify(corr) 
+    resp = {
+        'corr': corr
+    }
+    return jsonify(resp) 
 
-
+@app.route('/status', methods=['GET'])
 def model_status():
     if Model.module and Model.graph and Model.encodings:
         response = {

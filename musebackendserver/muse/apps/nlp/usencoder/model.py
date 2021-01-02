@@ -1,19 +1,30 @@
-import os, pathlib, json, re
+import os, pathlib, json, re, requests
 
-class LyricsEncoderModel:
+from django.conf import settings
+
+FLASK_HOST = settings.FLASK_HOST
+
+class UniversalSentenceEncoder:
     
     def __init__(self):
-        pass
+        self.processed_lyrics = None
 
-    def pre_processing(self, JSON_data):
-        songs, lyrics = JSON_data.get('song', None), JSON_data.get('lyrics', None)
-
+    def pre_processing(self, lyrics):
         self.processed_lyrics = remove_duplicate_lines(lyrics)
-        return {
-            "songs": songs, 
-            "lyrics": self.processed_lyrics,
-            "status": "OK"
-        }
+        return self.processed_lyrics
+
+    def get_model_results(self, payload):
+        headers = {'Content-type': 'application/json', 'Accept': 'text/plain'}
+        url = FLASK_HOST + '/embeddings'
+
+        r = requests.post(
+            url=url,
+            json=payload,
+            headers=headers,
+            timeout=30
+        )
+        #TODO: What happens if this times out? Add Code
+        return r
 
 
 def remove_duplicate_lines(data):
@@ -34,10 +45,16 @@ def remove_duplicate_lines(data):
         final_lyrics_list.append(final_lyrics)
     return final_lyrics_list
 
+
 def sanitize_tags(lyrics):
     """
     Remove the [Chorus] tags from Genius lyrics
+    Nothing happens if lyrics are not from Genius
     """
     for i in range(len(lyrics)):
-        lyrics[i] = re.sub('\[.*?\]\n', '', lyrics[i])
+        if lyrics[i]:
+            lyrics[i] = re.sub('\[.*?\]\n', '', lyrics[i])
+        else:
+            lyrics[i] = 'NULL'
     return lyrics
+

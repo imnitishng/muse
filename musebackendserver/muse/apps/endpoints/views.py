@@ -4,6 +4,7 @@ from rest_framework import viewsets
 from rest_framework import mixins
 from rest_framework import views, status
 from rest_framework.response import Response
+from rest_framework.exceptions import APIException
 
 from muse.wsgi import registry
 from .spotify_wrapper import SpotifySong
@@ -188,7 +189,7 @@ class LyricsView(views.APIView):
 
             song_requested_ids = Query.recommendation_ids.split(',')
             if song_requested_ids:
-                QueriedSongsDict = Songs.objects.in_bulk(song_requested_ids)            
+                QueriedSongsDict = Songs.objects.in_bulk(song_requested_ids)
                 response_song_object = []
                 for song_id, song in QueriedSongsDict.items():
                     single_song_response = {
@@ -210,7 +211,7 @@ class LyricsView(views.APIView):
                     'query_id': query_id,
                     'songs': 'None found in query'
                 }
-                return Response(fail_response)
+                return Response(fail_response, status=status.HTTP_400_BAD_REQUEST)
                 
         except Exception as e:
             raise APIException(str(e))

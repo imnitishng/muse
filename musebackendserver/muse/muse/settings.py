@@ -26,7 +26,7 @@ SECRET_KEY = '#0&uvflwtp7#lhgv6#69_!^mpaicndx@uz2b%2=b&xy$t7_4&^'
 DEBUG = True
 
 ALLOWED_HOSTS = []
-
+FLASK_HOST = 'http://127.0.0.1:5000'
 
 # Application definition
 

@@ -1,90 +1,12 @@
 import inspect
 from django.test import TestCase
+from rest_framework.test import APIClient
 
-from .usencoder.model import LyricsEncoderModel
+from .usencoder.model import UniversalSentenceEncoder
 from .registry import MLRegistry
+from apps.endpoints.test_utils import populate_test_db
 
 class NLPTests(TestCase):
-
-    def test_data_preprocessing(self):
-        """
-        Test the data preprocessing for model
-        """
-        input_data = {
-            "song": ["Joy - Bastille"],
-            "lyrics": ["""
-            [Verse 1]
-            Thought I'd never be waking on the kitchen floor
-            But here I lie, not the first time
-            Now my morning has broken, and it brings the fear
-            My mind's falling, fall in
-
-            [Pre-Chorus]
-            Then I feel my pulse quickening
-            But regrets can't change anything
-            Yeah, I feel my pulse quickening
-            When your name lights up the screen
-
-            [Chorus]
-            Oh joy, when you call me
-            I was giving up, oh, I was giving in
-            Joy, set my mind free
-            I was giving up, oh, I was giving in
-
-            [Post-Chorus]
-            How d'you always know when I'm down?
-            How d'you always know when I'm down?
-
-            [Verse 2]
-            Take a walk through the wreckage, clearing out my head
-            I hear your eyes roll right down the phone
-            I'm your walking disaster, keep on dragging me
-            From self-pity, poor me
-
-            [Pre-Chorus]
-            Then I feel my pulse quickening
-            But I wouldn't change a thing
-
-            [Chorus]
-            Oh joy, when you call me
-            I was giving up, oh, I was giving in
-            Joy, set my mind free
-            I was giving up, oh, I was giving in
-
-            [Post-Chorus]
-            How d'you always know when I'm down?
-            How d'you always know when I'm down?
-
-            [Bridge]
-            As the night dissolves into this final frame
-            You're a sweet relief, you saved me from my brain
-            From my brain, from my brain, from my brain
-            Oh, oh, oh, oh
-
-            [Chorus]
-            Oh joy, when you call me
-            I was giving up, oh, I was giving in
-            Joy, set my mind free
-            I was giving up, oh, I was giving in
-
-            [Post-Chorus]
-            How d'you always know when I'm down?
-            How d'you always know when I'm down?
-
-            [Outro]
-            I feel joy when you call me
-            I feel joy when you call me (I-I-I feel joy)
-            I feel joy when you call me
-            I feel joy when you call me
-            How d'you always know when I'm down?
-            How d'you always know when I'm down?
-            """]
-        }        
-        model = LyricsEncoderModel()
-        response = model.pre_processing(input_data)        
-        
-        self.assertEqual('OK', response['status'])        
-        self.assertTrue('lyrics' in response)
 
     def test_registry(self):
         """
@@ -93,16 +15,62 @@ class NLPTests(TestCase):
         registry = MLRegistry()
         self.assertEqual(len(registry.endpoints), 0)
         endpoint_name = "universal_sentence_encoder"
-        algorithm_object = LyricsEncoderModel()
+        algorithm_object = UniversalSentenceEncoder()
         algorithm_name = "Universal Sentence Encoder"
         algorithm_status = "production"
         algorithm_version = "0.0.1"
         algorithm_owner = "Nitish"
         algorithm_description = "Create sentence embeddings"
-        algorithm_code = inspect.getsource(LyricsEncoderModel)
-        # add to registry
+        algorithm_code = inspect.getsource(UniversalSentenceEncoder)
+
         registry.add_algorithm(endpoint_name, algorithm_object, algorithm_name,
                     algorithm_status, algorithm_version, algorithm_owner,
                     algorithm_description, algorithm_code)
-        # there should be one endpoint available
         self.assertEqual(len(registry.endpoints), 1)
+
+    def test_getting_ranks(self):
+        """
+        Test the final response of model to get the songs with 
+        their respective ranks.
+
+        [attrs]: 
+        `type`: type of the request to be sent 
+            full - song ID and lyrics; semi - only song ID
+        `songs`: dump of song IDs and names in the case of `full` type, 
+        only song IDs in `semi` type
+        `model`: Name of the model to use
+        Currently available models - 
+            use - Universal Sentence Encoder
+        """
+        populate_test_db()
+        client = APIClient()
+        input_data = {
+            'type': 'full',
+            'songs': [
+                {'1': 'ok man'},
+                {'2': 'ok dud'}
+            ],
+            'model': 'use'
+        }
+
+        url = '/api/v1/get_embeddings'
+        response = client.post(url, input_data, format="json")
+
+        print(response.data)
+
+# REST dump
+#
+# {
+#     "type": "semi",
+#     "songs": [
+#         "1","2","3","4","5","6","7","8","9","10"
+#     ]
+# }
+# {
+#     "type": "full",
+#     "songs": [
+#         {"1": "ok man"},
+#         {"2": "ok dud"}
+#     ],
+#     "model": "use"
+# }

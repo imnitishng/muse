@@ -4,6 +4,7 @@ from rest_framework.routers import DefaultRouter
 from .views import (EndpointViewSet, MLAlgorithmViewSet, 
                     AlgorithmStatusViewSet, NLPRequestViewSet, PredictView,
                     RecommendationsView, SpidersView, LyricsView)
+from apps.nlp.views import ModelView
 
 router = DefaultRouter(trailing_slash=False)
 router.register(r"endpoints", EndpointViewSet, basename="endpoints")
@@ -25,5 +26,8 @@ urlpatterns = [
     ),
     url(
         r"^api/v1/show_lyrics", LyricsView.as_view(), name="show_lyrics"
+    ),
+    url(
+        r"^api/v1/get_embeddings", ModelView.as_view(), name="get_embeddings"
     ),
 ]
