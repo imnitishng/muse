@@ -10,6 +10,8 @@
 
 # production
 /build
+/src/assets/main.css
+/src/assets/tailwind.css
 
 # misc
 .env
