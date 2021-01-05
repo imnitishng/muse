@@ -18,10 +18,7 @@
 .env.development.local
 .env.test.local
 .env.production.local
-<<<<<<< HEAD
-=======
 .env
->>>>>>> e45c9ea... [gitignore] Ignoring some files
 testing.rest
 
 npm-debug.log*
