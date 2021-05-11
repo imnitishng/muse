@@ -1,5 +1,5 @@
 import axios from 'axios'
-import qs from 'qs';
+import qs from 'qs'
 
 const baseUrl = 'https://api.spotify.com/v1'
 let accessToken = null
@@ -14,7 +14,7 @@ const searchSong = async songName => {
     'Authorization':  `Bearer ${accessToken}`,
   }
   const data = {
-    q: songName, 
+    q: songName,
     type: 'track',
     limit: 5
   }
@@ -24,14 +24,10 @@ const searchSong = async songName => {
     headers: headers,
   }
 
-  axios(requestBody)
-    .then(response => {
-      return response.data  
-    })
-    .catch(exception =>
-      console.log(exception)
-    )
-  
+  const response = await axios(requestBody)
+  console.log('response is: ')
+  console.log(response)
+  return response
 }
 
 
@@ -39,7 +35,7 @@ const getNewAccessToken = async () => {
   const clientToken = process.env.REACT_APP_CLIENT_SECRET_BASE64
 
   const tokenURL = 'https://accounts.spotify.com/api/token'
-  
+
   const requestBody = {
     method: 'post',
     url: tokenURL,
@@ -51,7 +47,7 @@ const getNewAccessToken = async () => {
       grant_type: 'client_credentials'
     })
   }
-  
+
   // axios(requestBody)
   //   .then(response => {
   //     accessToken = response.data.access_token
@@ -63,6 +59,7 @@ const getNewAccessToken = async () => {
 
   const response = await axios(requestBody)
   console.log('token recieved')
+  console.log(response)
   accessToken = response.data.access_token
 }
 

@@ -1,7 +1,7 @@
 import './assets/main.css'
-import React from 'react';
+import React from 'react'
 
-import './App.css';
+import './App.css'
 import Search from './components/search'
 
 const App = () => {
@@ -17,7 +17,7 @@ const App = () => {
         <p>footer</p>
       </div>
     </div>
-  );
+  )
 }
 
-export default App;
+export default App
