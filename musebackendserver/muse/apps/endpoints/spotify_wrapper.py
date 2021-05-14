@@ -49,10 +49,22 @@ class SpotifySong:
 
     def initialize_track(self, idx):
         """
-        Initialize track parameters to be used in all future operations
+        Initialize track parameters from backend API call to search and 
+        initialize the `idx`th search result be used in all future operations
         """
 
         self.trackInFocusObj = self.searchResultsObj['tracks']['items'][idx]
+        self.trackInFocusID = self.trackInFocusObj['id']        
+        self.trackArtistObj = self.trackInFocusObj.get('artists', [None])[0]
+        self.trackArtistID = self.trackArtistObj.get('id', None)
+
+    def initialize_track_from_request(self, trackObj):
+        """
+        Initialize track parameters sent as JSON from frontend app
+        to be used in all future operations
+        """
+
+        self.trackInFocusObj = trackObj
         self.trackInFocusID = self.trackInFocusObj['id']        
         self.trackArtistObj = self.trackInFocusObj.get('artists', [None])[0]
         self.trackArtistID = self.trackArtistObj.get('id', None)

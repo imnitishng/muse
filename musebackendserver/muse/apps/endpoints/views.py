@@ -110,12 +110,19 @@ class RecommendationsView(views.APIView):
     def post(self, request, format=None):
 
         try:
-            query_song_name = self.request.data.get("song", None)
-            query_artist_name = self.request.data.get("artist", None)
-
             SongEntity = SpotifySong()
-            SongEntity.search_track(query_song_name, query_artist_name)
-            SongEntity.initialize_track(0)
+            trackObj = self.request.data.get("spotifyObj", None)
+            if trackObj:
+                trackObj = json.loads(trackObj)
+                SongEntity.initialize_track_from_request(trackObj)
+                query_song_name = SongEntity.trackInFocusObj.get('name', None)
+                query_artist_name = SongEntity.trackArtistObj.get('name', None)
+            else:
+                query_song_name = self.request.data.get("song", None)
+                query_artist_name = self.request.data.get("artist", None)
+                SongEntity.search_track(query_song_name, query_artist_name)
+                SongEntity.initialize_track(0)
+                                    
             # SongEntity.get_audio_features()
             # SongEntity.get_artist_albums()
             # SongEntity.get_all_artist_tracks()
@@ -133,7 +140,6 @@ class RecommendationsView(views.APIView):
             SongEntity.save_recommends_to_file()
 
             recommendations_response = {
-                "status": "OK",
                 "query_id": song_query_object.id,
                 "recommendations": SongEntity.recommendedTracks,
                 "recommendation_ids": SongEntity.recommedation_track_ids

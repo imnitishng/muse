@@ -6,7 +6,7 @@ import Search from './components/search'
 const App = () => {
 
   return (
-    <div className="grid grid-rows-3 grid-cols-1">
+    <div className="grid grid-rows-1 grid-cols-1">
       <Search />
     </div>
   )

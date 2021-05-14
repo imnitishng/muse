@@ -1,13 +1,19 @@
 import React, { useState } from 'react'
 
 import spotifyService from '../services/SpotifyService'
+import { sendSearchedTrackInfo } from '../services/BackendService'
 
-const ResultEntrySong = ({ itemImage, itemName, itemArtist }) => {
+const ResultEntrySong = ({ item, itemImage, itemName, itemArtist }) => {
+  const handleSearchClick = (event) => {
+    event.preventDefault()
+    sendSearchedTrackInfo(item)
+  }
+
   return (
     <>
       <ul className="text-sm">
         <li className="py-0.5 cursor-pointer hover:bg-red-50 hover:text-gray-900">
-          <div className="flex flex-nowrap">
+          <div className="flex flex-nowrap" onClick={handleSearchClick}>
             <img src={itemImage} alt={itemName} className="flex-none h-50" width="50"/>
             <div className="ml-3 flex-grow">
               {itemName} - {itemArtist}
@@ -25,6 +31,7 @@ const SearchList = ({ results }) => {
       {results.items.map(item =>
         <ResultEntrySong
           key={item.id}
+          item={item}
           itemImage={item.album.images[2].url}
           itemName={item.name}
           itemArtist={item.artists[0].name}
