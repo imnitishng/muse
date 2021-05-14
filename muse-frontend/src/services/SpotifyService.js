@@ -5,10 +5,7 @@ const baseUrl = 'https://api.spotify.com/v1'
 let accessToken = null
 
 const searchSong = async songName => {
-  console.log('serach song called')
   await getNewAccessToken()
-
-  console.log('get token searching songs')
 
   const headers = {
     'Authorization':  `Bearer ${accessToken}`,
@@ -16,7 +13,7 @@ const searchSong = async songName => {
   const data = {
     q: songName,
     type: 'track',
-    limit: 5
+    limit: 10
   }
   const requestBody = {
     method: 'get',
@@ -25,8 +22,6 @@ const searchSong = async songName => {
   }
 
   const response = await axios(requestBody)
-  console.log('response is: ')
-  console.log(response)
   return response
 }
 
@@ -48,18 +43,7 @@ const getNewAccessToken = async () => {
     })
   }
 
-  // axios(requestBody)
-  //   .then(response => {
-  //     accessToken = response.data.access_token
-  //     console.log(response)
-  //   })
-  //   .catch(exception =>
-  //     console.log(exception)
-  //   )
-
   const response = await axios(requestBody)
-  console.log('token recieved')
-  console.log(response)
   accessToken = response.data.access_token
 }
 
