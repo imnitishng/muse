@@ -1,6 +1,6 @@
-import './assets/main.css'
 import React from 'react'
 
+import './assets/main.css'
 import Search from './components/search'
 
 const App = () => {

@@ -130,6 +130,7 @@ class SpotifySong:
 
         songs = response.get('tracks')
         self.store_songs_to_model(songs)
+        return response
 
     def store_songs_to_model(self, songs):
         for song in songs:

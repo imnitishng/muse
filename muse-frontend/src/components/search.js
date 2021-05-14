@@ -1,12 +1,19 @@
 import React, { useState } from 'react'
+import { useSelector, useDispatch } from 'react-redux'
 
 import spotifyService from '../services/SpotifyService'
 import { sendSearchedTrackInfo } from '../services/BackendService'
+import { addSearchResults, clearSearchResults } from '../reducers/searchReducers'
+import { addSpotifyRecommendations } from '../reducers/infoReducers'
+
 
 const ResultEntrySong = ({ item, itemImage, itemName, itemArtist }) => {
-  const handleSearchClick = (event) => {
+  const dispatch = useDispatch()
+
+  const handleSearchClick = async (event) => {
     event.preventDefault()
-    sendSearchedTrackInfo(item)
+    const response = await sendSearchedTrackInfo(item)
+    dispatch(addSpotifyRecommendations(response.data))
   }
 
   return (
@@ -28,7 +35,7 @@ const ResultEntrySong = ({ item, itemImage, itemName, itemArtist }) => {
 const SearchList = ({ results }) => {
   return (
     <div>
-      {results.items.map(item =>
+      {results.map(item =>
         <ResultEntrySong
           key={item.id}
           item={item}
@@ -40,10 +47,10 @@ const SearchList = ({ results }) => {
   )
 }
 
-const SearchResults = ({ songs }) => {
-  if(songs)
+const SearchResults = ({ data }) => {
+  if(data.search.searchResults.length > 0)
     return (
-      <SearchList results={songs}/>
+      <SearchList results={data.search.searchResults}/>
     )
   else
     return (
@@ -55,14 +62,14 @@ const SearchResults = ({ songs }) => {
 
 const Search = () => {
 
+  const dispatch = useDispatch()
   const [search, setSearch] = useState('')
-  const [songs, setSongs] = useState(null)
 
   const getSongs = async () => {
     const songReturned = await spotifyService.searchSong(search)
 
     if(songReturned)
-      setSongs(songReturned.data.tracks)
+      dispatch(addSearchResults(songReturned.data.tracks.items))
   }
 
   const handleSearchChange = (event) => {
@@ -72,14 +79,14 @@ const Search = () => {
     if(event.target.value.length > 3)
       getSongs()
     else
-      setSongs(null)
+      dispatch(clearSearchResults())
   }
 
   return (
     <div className="mt-28 mx-14">
       <label className="font-mono text-gray-700 text-lg">
         <input id="search" onChange={handleSearchChange} className="border-4 border-transparent border-purple-600 w-full h-8 mx-auto rounded-md focus:border-teal-400" />
-        <SearchResults songs={songs}/>
+        <SearchResults data={useSelector(state => state)}/>
       </label>
     </div>
   )

@@ -126,7 +126,7 @@ class RecommendationsView(views.APIView):
             # SongEntity.get_audio_features()
             # SongEntity.get_artist_albums()
             # SongEntity.get_all_artist_tracks()
-            SongEntity.get_song_recommendations()
+            recommendationsObj = SongEntity.get_song_recommendations()
 
             recommendations = SongEntity.recommendedTracks
             recommendation_ids = str(SongEntity.recommedation_track_ids)[1:-1]
@@ -142,7 +142,8 @@ class RecommendationsView(views.APIView):
             recommendations_response = {
                 "query_id": song_query_object.id,
                 "recommendations": SongEntity.recommendedTracks,
-                "recommendation_ids": SongEntity.recommedation_track_ids
+                "recommendation_ids": SongEntity.recommedation_track_ids,
+                "recommendations_obj": recommendationsObj
             }
             return Response(recommendations_response)
 
