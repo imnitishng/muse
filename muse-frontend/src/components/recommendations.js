@@ -18,8 +18,8 @@ const Track = ({  trackInfo, trackImage, trackName }) => {
 
 const RecommendationsBlock = () => {
   const fetchedSongsObj = useSelector(state => state.results)
-  console.log(fetchedSongsObj.spotifyRecommendations.recommendations_obj)
   const spotifyTracks = fetchedSongsObj.spotifyRecommendations.recommendations_obj.tracks
+
   return (
     <div>
       <ul className="text-sm">
