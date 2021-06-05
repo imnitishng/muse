@@ -13,3 +13,6 @@ configs.py
 lyrics.txt
 songs.txt
 musebackendserver/muse/apps/endpoints/congfigs.py
+
+# Database
+db.sqlite3

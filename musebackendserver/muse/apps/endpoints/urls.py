@@ -1,33 +1,25 @@
 from django.conf.urls import url, include
-from rest_framework.routers import DefaultRouter
 
-from .views import (EndpointViewSet, MLAlgorithmViewSet, 
-                    AlgorithmStatusViewSet, NLPRequestViewSet, PredictView,
-                    RecommendationsView, SpidersView, LyricsView)
+from .views import (PredictView, AccessToken, RecommendationsView, SpidersView, LyricsView)
 from apps.nlp.views import ModelView
 
-router = DefaultRouter(trailing_slash=False)
-router.register(r"endpoints", EndpointViewSet, basename="endpoints")
-router.register(r"mlalgorithms", MLAlgorithmViewSet, basename="mlalgorithms")
-router.register(r"mlalgorithmstatuses", AlgorithmStatusViewSet, basename="algorithmstatuses")
-router.register(r"mlrequests", NLPRequestViewSet, basename="nlprequests")
-
 urlpatterns = [
-    url(r"^api/v1/", include(router.urls)),
-    # add predict url
     url(
-        r"^api/v1/(?P<endpoint_name>.+)/predict$", PredictView.as_view(), name="predict"
+        r"api/access_token", AccessToken.as_view(), name="predict"
     ),
     url(
-        r"^api/v1/sp_recommedations", RecommendationsView.as_view(), name="spotify_recommendations"
+        r"api/sp_recommedations", RecommendationsView.as_view(), name="spotify_recommendations"
     ),
     url(
-        r"^api/v1/start_fetch", SpidersView.as_view(), name="start_fetch"
+        r"api/start_fetch", SpidersView.as_view(), name="start_fetch"
     ),
     url(
-        r"^api/v1/show_lyrics", LyricsView.as_view(), name="show_lyrics"
+        r"api/show_lyrics", LyricsView.as_view(), name="show_lyrics"
     ),
     url(
-        r"^api/v1/get_embeddings", ModelView.as_view(), name="get_embeddings"
+        r"api/get_embeddings", ModelView.as_view(), name="get_embeddings"
+    ),
+    url(
+        r"api/(?P<endpoint_name>.+)/predict$", PredictView.as_view(), name="predict"
     ),
 ]

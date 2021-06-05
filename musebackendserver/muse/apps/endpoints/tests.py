@@ -8,12 +8,12 @@ class EndpointTests(TestCase):
 
     def test_recommendations_view(self):
         client = APIClient()
-        
+
         payload = {
             "song": "cheapskate",
             "artist": "oliver tree"
         }
-        url = "/api/v1/sp_recommedations"
+        url = "/api/sp_recommedations"
         response = client.post(url, payload, format="json")
         
         self.assertEqual(response.status_code, 200)
@@ -28,7 +28,7 @@ class EndpointTests(TestCase):
         payload = {
             "query_id": "1"
         }
-        url = "/api/v1/show_lyrics"
+        url = "/api/show_lyrics"
         response = client.post(url, payload, format="json")
         
         self.assertEqual(response.status_code, 200)
