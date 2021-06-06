@@ -24,7 +24,7 @@ class MySQLPipeline(object):
     def from_crawler(cls, crawler):
         db_settings = crawler.settings.getdict("DB_CREDS")
         if not db_settings:
-            raise NotConfigured
+            raise
         db = db_settings['db']
         user = db_settings['user']
         passwd = db_settings['pass']
@@ -66,7 +66,6 @@ class DjangoModelPipeline(object):
 
     def __init__(self):
         self.songs_not_found = []
-        self.current_query_obj = None
 
     def open_spider(self, spider):
         pass
@@ -74,7 +73,6 @@ class DjangoModelPipeline(object):
     def process_item(self, item, spider):   
         if item.get('type') != 'lyrics':
             self.songs_not_found.append(item.get('song_id', 1))
-            self.current_query_obj = item.get('query_id')
         else:
             song = Songs.objects.get(pk=item.get('song_id'))
             song.lyrics = item.get('lyrics')
@@ -83,9 +81,9 @@ class DjangoModelPipeline(object):
     def close_spider(self, spider):
         # if spider.name == 'lyricraper_mxm':
             # os.remove("to_mxm.txt")
-        if self.current_query_obj:
-            self.current_query_obj.songids_to_process = str(self.songs_not_found)[1:-1]
+        if self.songs_not_found:
+            spider.UserQueryObject.songids_to_process = str(self.songs_not_found)[1:-1]
         else:
-            self.current_query_obj.songids_to_process = ''
-        self.current_query_obj.save()
+            spider.UserQueryObject.songids_to_process = ''
+        spider.UserQueryObject.save()
         

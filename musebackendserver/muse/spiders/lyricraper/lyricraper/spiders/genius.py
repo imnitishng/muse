@@ -1,8 +1,8 @@
 import scrapy
-import urllib
-import csv, os, json
-import mysql.connector
+import json
 import re
+import os
+import logging
 
 from apps.endpoints.models import Songs, SongQueryObject, QueryStatus
 
@@ -16,19 +16,23 @@ class LyricraperSpider(scrapy.Spider):
         self.songs = []
         self.song_ids = []
         self.urls_to_scrape = []
-        
-        original_query = SongQueryObject.objects.get(pk=user_query_id)
-        self.UserQueryObject = QueryStatus.objects.get(pk=original_query)
-        self.songs_from_model()
-        
-        # Parse songs to start urls for scraping
-        target_urls = []
-        for song in self.songs:
-            song = re.sub('\([^\}]*\)', '', song)
-            html_encoded = song.replace(' ', '+')            
-            search_url = f'https://genius.com/api/search/multi?per_page=5&q={html_encoded}'
-            target_urls.append(search_url)
-        self.urls_to_scrape = target_urls[:]
+
+        if os.environ.get('SCRAPY_CHECK'):
+            self.UserQueryObject = None
+            pass
+        else:
+            original_query = SongQueryObject.objects.get(pk=user_query_id)
+            self.UserQueryObject = QueryStatus.objects.get(pk=original_query)
+            self.songs_from_model()
+            
+            # Parse songs to start urls for scraping
+            target_urls = []
+            for song in self.songs:
+                song = re.sub('\([^\}]*\)', '', song)
+                html_encoded = song.replace(' ', '+')            
+                search_url = f'https://genius.com/api/search/multi?per_page=5&q={html_encoded}'
+                target_urls.append(search_url)
+            self.urls_to_scrape = target_urls[:]
 
     def start_requests(self):
         for song_id, url in zip(self.song_ids, self.urls_to_scrape):
@@ -41,9 +45,16 @@ class LyricraperSpider(scrapy.Spider):
     def parse(self, response, song_id):
         """
         Extract track names from search and send forward for scraping.
-                                OR
+        OR
         Update the query object based on if the search results for the
         particular song is found or not.
+
+        Testing:
+        @url https://genius.com/api/search/multi?per_page=5&q=Bummerland+-+AJR
+        @url https://genius.com/api/search/multi?per_page=5&q=nitishguptaok++-+bbno
+        @cb_kwargs {"song_id": 1}
+        @returns requests 0 1
+        @returns items 0 1
         """        
         response_json = json.loads(response.text)
         response_section = response_json.get('response', None).get('sections', None)
@@ -58,6 +69,9 @@ class LyricraperSpider(scrapy.Spider):
                 except:
                     # Any exception means we never found the searched song
                     track_url = None
+        else:
+            logging.error("Something is wrong with website response. Exiting.")
+            return
                 
         if track_url:
             # First song is all we need, so we follow that link
