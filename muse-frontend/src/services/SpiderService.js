@@ -1,17 +1,25 @@
 import axios from 'axios'
 
-const backendURL = 'http://127.0.0.1:6800'
+const baseURL = 'http://127.0.0.1:8000/api/spiders'
 
-export const getSpiderStatus = async (crawlerID) => {
-  const response = await axios.get(`${backendURL}/listjobs`)
+export const startLyricsFetch = async (queryID) => {
+  const requestBody = {
+    query_id: queryID
+  }
+
+  const response = await axios.post(`${baseURL}/start`, requestBody)
   console.log(response)
-  console.log(crawlerID)
   return response
 }
 
-export const spiderFinished = async (response) => {
-  if(response)
+export const getSpiderStatus = async () => {
+  const response = await axios.get(`${baseURL}/status`)
+  console.log(response)
+  return response
+}
+
+export const spiderFinished = async (response, crawlerID) => {
+  if(crawlerID in response.data.finished)
     return true
-  else
-    return false
+  return false
 }

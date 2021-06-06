@@ -10,8 +10,8 @@ const RanksLoadingBtn = ({ setSpiderJobStatus, crawlerKey }) => {
   useInterval(
     async () => {
       console.log('Getting spider status')
-      const response = await getSpiderStatus(crawlerKey)
-      if(spiderFinished(response)) {
+      const response = await getSpiderStatus()
+      if(spiderFinished(response, crawlerKey)) {
         setSpiderJobStatus('finished')
       }
     },

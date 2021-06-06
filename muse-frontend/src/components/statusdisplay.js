@@ -3,7 +3,7 @@ import React, { useState } from 'react'
 import RanksReadyBtn from './ranksReady'
 import RanksLoadingBtn from './ranksLoading'
 
-import { startLyricsFetch } from '../services/BackendService'
+import { startLyricsFetch } from '../services/SpiderService'
 
 const StatusDisplay = ({ recommendationsObj }) => {
 
