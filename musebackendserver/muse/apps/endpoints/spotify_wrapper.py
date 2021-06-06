@@ -43,8 +43,8 @@ class SpotifySong:
         self.searchResultsObj = self.client.search(
             q=self.search_term, limit=20)
 
-        for idx, track in enumerate(self.searchResultsObj['tracks']['items']):
-            print(idx, track['name'])
+        # for idx, track in enumerate(self.searchResultsObj['tracks']['items']):
+        #     print(idx, track['name'])
 
     def initialize_track(self, idx):
         """

@@ -16,3 +16,4 @@ musebackendserver/muse/apps/endpoints/congfigs.py
 
 # Database
 db.sqlite3
+twistd.pid

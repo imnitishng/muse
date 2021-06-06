@@ -108,7 +108,6 @@ class LyricraperSpider(scrapy.Spider):
         Extract songs from django model `Song` based on the query
         recieved by the user.
         '''
-        self.logger.warning(f"To process: {QueryStatus.objects.all().values('songids_to_process', 'query_object')}")
         if self.UserQueryObject.songids_to_process:
             requested_songIDs = self.UserQueryObject.songids_to_process.split(',')
             requested_songsDict = Songs.objects.in_bulk(requested_songIDs)
