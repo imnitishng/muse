@@ -18,8 +18,12 @@ export const getSpiderStatus = async () => {
   return response
 }
 
-export const spiderFinished = async (response, crawlerID) => {
-  if(crawlerID in response.data.finished)
-    return true
-  return false
+export const getFinishedSpiders = (response) => {
+  const finishedSpiders = response.data.finished
+  const spiderIDs = []
+  finishedSpiders.forEach(
+    (finishedSpiderInfo) => {spiderIDs.push(finishedSpiderInfo['id'])}
+  )
+  console.log(spiderIDs)
+  return spiderIDs
 }

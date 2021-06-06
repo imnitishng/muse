@@ -1,19 +1,23 @@
 import React from 'react'
 
 import { useInterval } from '../utils/polling'
-import { getSpiderStatus, spiderFinished } from '../services/SpiderService'
+import { getSpiderStatus, getFinishedSpiders } from '../services/SpiderService'
 
 const SPIDER_POLLING_INTERVAL = 1000
 
 const RanksLoadingBtn = ({ setSpiderJobStatus, crawlerKey }) => {
 
+  const handleSpiderFinished = async () => {
+    const response = await getSpiderStatus()
+    const finishedSpiderIDs = getFinishedSpiders(response)
+    if(finishedSpiderIDs.includes(crawlerKey)) {
+      setSpiderJobStatus('finished')
+    }
+  }
+
   useInterval(
     async () => {
-      console.log('Getting spider status')
-      const response = await getSpiderStatus()
-      if(spiderFinished(response, crawlerKey)) {
-        setSpiderJobStatus('finished')
-      }
+      await handleSpiderFinished()
     },
     SPIDER_POLLING_INTERVAL
   )
