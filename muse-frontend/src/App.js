@@ -12,10 +12,8 @@ const App = () => {
     <div className="flex flex-col justify-end">
       <Search/>
       <RecommendationsPanel>
-        <div className="md:flex md:flex-row justify-around">
-          <RecommendationsBlock />
-          <RecommendationsTuner />
-        </div>
+        <RecommendationsBlock />
+        <RecommendationsTuner />
       </RecommendationsPanel>
     </div>
   )

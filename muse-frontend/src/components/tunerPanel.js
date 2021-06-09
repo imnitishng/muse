@@ -8,7 +8,7 @@ const RecommendationsTuner = () => {
   const recommendationsObj = useSelector(state => state.results)
 
   return (
-    <div className="w:1/3">
+    <div>
       <StatusDisplay recommendationsObj={recommendationsObj}/>
     </div>
   )

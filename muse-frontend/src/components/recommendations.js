@@ -5,9 +5,11 @@ const Track = ({  trackInfo, trackImage, trackName }) => {
   return (
     <>
       <li className="py-0.5 cursor-pointer hover:bg-red-50 hover:text-gray-900">
-        <div className="flex flex-wrap">
-          <img src={trackImage} alt={trackName} className="flex-none h-50" width="50"/>
-          <div className="ml-3">
+        <div className="flex flex-row">
+          <div className="flex-none">
+            <img src={trackImage} alt={trackName} className="h-50" width="50"/>
+          </div>
+          <div className="ml-3 truncate">
             {trackName} - {trackInfo.artists[0]}
           </div>
         </div>
@@ -21,7 +23,7 @@ const RecommendationsBlock = () => {
   const spotifyTracks = fetchedSongsObj.spotifyRecommendations.recommendations_obj.tracks
 
   return (
-    <div>
+    <div className="flex-grow">
       <ul className="text-sm">
         {spotifyTracks.map(track =>
           <Track

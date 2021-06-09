@@ -6,7 +6,7 @@ const ResultsPanel = (props) => {
 
   if(AppLayout.appLayout === 'withResults')
     return (
-      <div>
+      <div className="w-11/12 md:flex md:flex-row self-center">
         { props.children }
       </div>
     )

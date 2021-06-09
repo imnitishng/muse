@@ -8,12 +8,12 @@ import { addSpotifyRecommendations } from '../reducers/infoReducers'
 import { changeAppLayout } from '../reducers/styleReducers'
 
 
-const ResultEntrySong = ({ setDisplay, item, itemImage, itemName, itemArtist }) => {
+const ResultEntrySong = ({ setShowSuggestions, item, itemImage, itemName, itemArtist }) => {
   const dispatch = useDispatch()
 
   const handleSearchClick = async (event) => {
     event.preventDefault()
-    setDisplay({ display: 'none' })
+    setShowSuggestions(false)
     const response = await sendSearchedTrackInfo(item)
     dispatch(addSpotifyRecommendations(response.data))
     dispatch(changeAppLayout('withResults'))
@@ -21,7 +21,9 @@ const ResultEntrySong = ({ setDisplay, item, itemImage, itemName, itemArtist }) 
 
   return (
     <>
-      <li className="py-0.5 cursor-pointer hover:bg-red-50 hover:text-gray-900">
+      <li
+        className="py-0.5 cursor-pointer hover:bg-red-50 hover:text-gray-900"
+        onMouseDown={(e) => e.preventDefault()}>
         <div className="flex flex-nowrap" onClick={handleSearchClick}>
           <img src={itemImage} alt={itemName} className="flex-none h-50" width="50"/>
           <div className="ml-3">
@@ -33,16 +35,15 @@ const ResultEntrySong = ({ setDisplay, item, itemImage, itemName, itemArtist }) 
   )
 }
 
-const SearchList = ({ results }) => {
-  const [display, setDisplay] = useState({ display: '' })
+const SearchList = ({ results, setShowSuggestions }) => {
 
   return (
-    <div className="w-full" style={display}>
+    <div className="w-full z-10 md:absolute bg-white border-gray-100 border-2 shadow-2xl">
       <ul className="text-sm">
         {results.map(item =>
           <ResultEntrySong
             key={item.id}
-            setDisplay={setDisplay}
+            setShowSuggestions={setShowSuggestions}
             item={item}
             itemImage={item.album.images[2].url}
             itemName={item.name}
@@ -53,15 +54,20 @@ const SearchList = ({ results }) => {
   )
 }
 
-const SearchResults = ({ data }) => {
-  if(data.search.searchResults.length > 0)
+const SearchResults = ({ data, showSuggestions, setShowSuggestions }) => {
+  if(data.search.searchResults.length > 0 && showSuggestions === true)
     return (
-      <SearchList results={data.search.searchResults}/>
+      <SearchList results={data.search.searchResults} setShowSuggestions={setShowSuggestions}/>
+    )
+  else if((data.search.searchResults.length === 0))
+    return (
+      <>
+        Search a track
+      </>
     )
   else
     return (
       <>
-        Search a track
       </>
     )
 }
@@ -70,6 +76,7 @@ const Search = () => {
 
   const dispatch = useDispatch()
   const [search, setSearch] = useState('')
+  const [showSuggestions, setShowSuggestions] = useState(false)
 
   const getSongs = async () => {
     const songReturned = await spotifyService.searchSong(search)
@@ -80,6 +87,7 @@ const Search = () => {
 
   const handleSearchChange = (event) => {
     event.preventDefault()
+    setShowSuggestions(true)
     setSearch(event.target.value)
 
     if(event.target.value.length > 3)
@@ -89,11 +97,20 @@ const Search = () => {
   }
 
   return (
-    <div className="mt-28 mx-14">
+    <div className="mt-28 w-5/6 self-center">
       <label className="font-mono text-gray-700 text-lg">
-        <input id="search" onChange={handleSearchChange} className="border-4 border-transparent border-purple-600 w-full h-8 mx-auto rounded-md focus:border-teal-400" />
+        <input id="search"
+          className="border-4 border-transparent border-purple-600 w-full h-8 mx-auto rounded-md focus:border-teal-400"
+          onChange={handleSearchChange}
+          onFocus={() => setShowSuggestions(true)}
+          onBlur={() => setShowSuggestions(false)}
+        />
       </label>
-      <SearchResults data={useSelector(state => state)}/>
+      <div className="relative">
+        <SearchResults data={useSelector(state => state)}
+          showSuggestions={showSuggestions}
+          setShowSuggestions={setShowSuggestions}/>
+      </div>
     </div>
   )
 
