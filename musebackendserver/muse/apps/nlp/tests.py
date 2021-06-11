@@ -28,7 +28,7 @@ class NLPTests(TestCase):
                     algorithm_description, algorithm_code)
         self.assertEqual(len(registry.endpoints), 1)
 
-    def test_getting_ranks(self):
+    def test_getting_ranks_full(self):
         """
         Test the final response of model to get the songs with 
         their respective ranks.
@@ -44,6 +44,7 @@ class NLPTests(TestCase):
         """
         populate_test_db()
         client = APIClient()
+
         input_data = {
             'type': 'full',
             'songs': [
@@ -53,24 +54,41 @@ class NLPTests(TestCase):
             'model': 'use'
         }
 
-        url = '/api/v1/get_embeddings'
+        url = '/api/get_embeddings'
         response = client.post(url, input_data, format="json")
 
-        print(response.data)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data['status'], 'OK')
+        self.assertIn('ranks', response.data)
 
-# REST dump
-#
-# {
-#     "type": "semi",
-#     "songs": [
-#         "1","2","3","4","5","6","7","8","9","10"
-#     ]
-# }
-# {
-#     "type": "full",
-#     "songs": [
-#         {"1": "ok man"},
-#         {"2": "ok dud"}
-#     ],
-#     "model": "use"
-# }
+    def test_getting_ranks_semi(self):
+        """
+        Test the final response of model to get the songs with 
+        their respective ranks.
+
+        [attrs]: 
+        `type`: type of the request to be sent 
+            semi - only song ID
+        `songs`: dump of song IDs and names in the case of `full` type, 
+        only song IDs in `semi` type
+        `model`: Name of the model to use
+        Currently available models - 
+            use - Universal Sentence Encoder
+        """
+        populate_test_db()
+        client = APIClient()
+
+        input_data = {
+            'type': 'semi',
+            'songs': [
+                '1', '2', '3'
+            ],
+            'model': 'use'
+        }
+
+        url = '/api/get_embeddings'
+        response = client.post(url, input_data, format="json")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data['status'], 'OK')
+        self.assertIn('ranks', response.data)
