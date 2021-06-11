@@ -1,16 +1,16 @@
 import React from 'react'
 import { useSelector } from 'react-redux'
 
-const Track = ({  trackInfo, trackImage, trackName }) => {
+const Track = ({  trackImage, trackNameToShow }) => {
   return (
     <>
       <li className="py-0.5 cursor-pointer hover:bg-red-50 hover:text-gray-900">
         <div className="flex flex-row">
           <div className="flex-none">
-            <img src={trackImage} alt={trackName} className="h-50" width="50"/>
+            <img src={trackImage} alt={trackNameToShow} className="h-50" width="50"/>
           </div>
           <div className="ml-3 truncate">
-            {trackName} - {trackInfo.artists[0]}
+            {trackNameToShow}
           </div>
         </div>
       </li>
@@ -20,7 +20,7 @@ const Track = ({  trackInfo, trackImage, trackName }) => {
 
 const RecommendationsBlock = () => {
   const fetchedSongsObj = useSelector(state => state.results)
-  const spotifyTracks = fetchedSongsObj.spotifyRecommendations.recommendations_obj.tracks
+  const spotifyTracks = fetchedSongsObj.recommendations
 
   return (
     <div className="flex-grow">
@@ -28,9 +28,9 @@ const RecommendationsBlock = () => {
         {spotifyTracks.map(track =>
           <Track
             key={track.id}
-            trackInfo={track}
-            trackImage={track.album.images[2].url}
-            trackName={track.name}
+            trackInfo={track.info}
+            trackImage={track.info.album.images[2].url}
+            trackNameToShow={track.nameToShow}
           />)}
       </ul>
     </div>

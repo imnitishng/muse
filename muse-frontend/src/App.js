@@ -4,7 +4,7 @@ import './assets/main.css'
 import Search from './components/search'
 import RecommendationsPanel from './components/resultsPanel'
 import RecommendationsBlock from './components/recommendations'
-import RecommendationsTuner from './components/tunerPanel'
+import RecommendationsTuner from './components/TunerPanel/tunerPanel'
 
 const App = () => {
 

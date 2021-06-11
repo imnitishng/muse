@@ -9,6 +9,7 @@
     "autoprefixer": "^10.0.2",
     "axios": "^0.21.1",
     "dotenv": "^8.2.0",
+    "lodash": "^4.17.21",
     "postcss": "^8.2.15",
     "postcss-cli": "^8.3.0",
     "qs": "^6.9.4",

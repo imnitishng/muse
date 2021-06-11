@@ -1,11 +1,11 @@
 import React from 'react'
 
-import { useInterval } from '../utils/polling'
-import { getSpiderStatus, getFinishedSpiders } from '../services/SpiderService'
+import { useInterval } from '../../utils/polling'
+import { getSpiderStatus, getFinishedSpiders } from '../../services/SpiderService'
 
 const SPIDER_POLLING_INTERVAL = 1000
 
-const RanksLoadingBtn = ({ setSpiderJobStatus, crawlerKey }) => {
+const SpiderRunningBtn = ({ setSpiderJobStatus, crawlerKey }) => {
 
   const handleSpiderFinished = async () => {
     const response = await getSpiderStatus()
@@ -16,8 +16,8 @@ const RanksLoadingBtn = ({ setSpiderJobStatus, crawlerKey }) => {
   }
 
   useInterval(
-    async () => {
-      await handleSpiderFinished()
+    () => {
+      handleSpiderFinished()
     },
     SPIDER_POLLING_INTERVAL
   )
@@ -32,4 +32,4 @@ const RanksLoadingBtn = ({ setSpiderJobStatus, crawlerKey }) => {
   )
 }
 
-export default RanksLoadingBtn
+export default SpiderRunningBtn
