@@ -3,29 +3,28 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@craco/craco": "^6.1.2",
     "@testing-library/jest-dom": "^5.11.6",
     "@testing-library/react": "^11.2.2",
     "@testing-library/user-event": "^12.2.2",
-    "autoprefixer": "^10.0.2",
     "axios": "^0.21.1",
     "dotenv": "^8.2.0",
     "lodash": "^4.17.21",
     "postcss": "^8.2.15",
     "postcss-cli": "^8.3.0",
+    "postcss-import": "^14.0.2",
     "qs": "^6.9.4",
     "react": "^17.0.1",
     "react-dom": "^17.0.1",
     "react-scripts": "4.0.0",
-    "tailwindcss": "^2.0.1",
     "web-vitals": "^0.2.4"
   },
   "scripts": {
-    "start": "npm run watch:css && react-scripts start",
-    "build": "npm run watch:css && react-scripts build",
-    "test": "react-scripts test",
+    "start": "craco start",
+    "build": "craco build",
+    "test": "craco test",
     "eject": "react-scripts eject",
-    "lint": "eslint .",
-    "watch:css": "postcss src/assets/tailwind.css -o src/assets/main.css"
+    "lint": "eslint ."
   },
   "eslintConfig": {
     "extends": [
@@ -46,6 +45,7 @@
     ]
   },
   "devDependencies": {
+    "autoprefixer": "^9.8.6",
     "deep-freeze": "0.0.1",
     "eslint": "^7.26.0",
     "eslint-config-standard": "^16.0.2",
@@ -56,6 +56,7 @@
     "eslint-plugin-react-hooks": "^4.2.0",
     "react-redux": "^7.2.4",
     "redux": "^4.1.0",
-    "redux-devtools-extension": "^2.13.9"
+    "redux-devtools-extension": "^2.13.9",
+    "tailwindcss": "npm:@tailwindcss/postcss7-compat@^2.1.4"
   }
 }
