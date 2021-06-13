@@ -8,7 +8,7 @@ import RecommendationsTuner from './components/TunerPanel/tunerPanel'
 const App = () => {
 
   return (
-    <div className="flex flex-col justify-end">
+    <div className="flex flex-col justify-end font-body">
       <Search/>
       <RecommendationsPanel>
         <RecommendationsBlock />
