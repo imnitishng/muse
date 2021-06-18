@@ -45,9 +45,14 @@ export const infoReducer = (state = initialState, action) => {
         processedLyrics: rankIDMap[track.id][1]
       }))
 
+    const sortedRecommendations = _.sortBy(
+      updatedRecommendations,
+      [(o) => (o.rank)]
+    ).reverse()
+
     return {
       query_id: action.recommendationsObj.query_id,
-      recommendations: updatedRecommendations
+      recommendations: sortedRecommendations
     }
   }
 

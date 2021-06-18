@@ -3,7 +3,8 @@ import React from 'react'
 import Search from './components/search'
 import RecommendationsPanel from './components/resultsPanel'
 import RecommendationsBlock from './components/recommendations'
-import RecommendationsTuner from './components/TunerPanel/tunerPanel'
+import RecommendationsTuner from './components/tunerPanel/tunerPanel'
+import Notification from './components/helpers/notification'
 
 const App = () => {
 
@@ -14,6 +15,7 @@ const App = () => {
         <RecommendationsBlock />
         <RecommendationsTuner />
       </RecommendationsPanel>
+      <Notification content={'testing a long notification'}/>
     </div>
   )
 }
