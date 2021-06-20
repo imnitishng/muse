@@ -1,3 +1,11 @@
+var rankColors = require('./src/utils/generateColors').rankColorsMap
+var rankColorsMap = {}
+
+rankColors.forEach((colorHex, i) => {
+  const colorName = `${210-(i+1)*10}`
+  rankColorsMap[colorName] = colorHex
+})
+
 module.exports = {
   purge: ['./src/**/*.{js,jsx,ts,tsx}', './public/index.html'],
   darkMode: false, // or 'media' or 'class'
@@ -5,6 +13,9 @@ module.exports = {
     extend: {
       width: {
         '1.5/12': '12.33%'
+      },
+      colors: {
+        rankColor: rankColorsMap
       },
       fontFamily: {
         condensed: ['Saira Extra Condensed'],
