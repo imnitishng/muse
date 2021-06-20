@@ -3,6 +3,9 @@ module.exports = {
   darkMode: false, // or 'media' or 'class'
   theme: {
     extend: {
+      width: {
+        '1.5/12': '12.33%'
+      },
       fontFamily: {
         condensed: ['Saira Extra Condensed'],
         body: ['Montserrat']

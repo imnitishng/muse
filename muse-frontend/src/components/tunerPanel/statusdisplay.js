@@ -1,9 +1,12 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useDispatch } from 'react-redux'
+import toast from 'react-hot-toast'
 
 import SpiderReadyBtn from './spiderReadyBtn'
 import SpiderRunningBtn from './spiderLoadingBtn'
 import RanksLoadingBtn from './ranksLoadingBtn'
+import FinishedProcessBtn from './finishedProcessBtn'
+import SpiderRunningToast from '../helpers/spiderRunningToast'
 
 import { startLyricsFetch } from '../../services/SpiderService'
 import { fetchRanks } from '../../services/ModelService'
@@ -16,6 +19,29 @@ const StatusDisplay = ({ recommendationsObj }) => {
   const [spiderJobStatus, setSpiderJobStatus] = useState('waiting')
   const [crawlerKey, setCrawlerKey] = useState(null)
 
+  useEffect(() => {
+    if(spiderJobStatus === 'running') {
+      const toastId = toast.custom(
+        (t) => {
+          t.duration = Infinity
+          return (
+            <SpiderRunningToast tracks={recommendationsObj.recommendations}/>
+          )
+        }
+      )
+      window.localStorage.setItem('toastId', toastId)
+    }
+    else if(spiderJobStatus === 'finished') {
+      const toastId = window.localStorage.getItem('toastId')
+      if(toastId !== null)
+        toast.success('Lyrics fetched!', {
+          id: toastId,
+          duration: 3000
+        })
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [spiderJobStatus])
+
   const handleGetLyrics = async (event) => {
     event.preventDefault()
     const response = await startLyricsFetch(recommendationsObj.query_id)
@@ -25,7 +51,14 @@ const StatusDisplay = ({ recommendationsObj }) => {
 
   const getTrackRanks = async () => {
     const recommendation_ids = recommendationsObj.recommendations.map((e) => (e.id))
+    const rankToastID = toast.loading('Ranking Tracks')
+
     const response = await fetchRanks(recommendation_ids)
+    toast.success('Done!', {
+      id: rankToastID,
+      duration: 3000
+    })
+
     setSpiderJobStatus('dead')
     dispatch(assignRanksToTracks(response, recommendationsObj))
   }
@@ -59,9 +92,7 @@ const StatusDisplay = ({ recommendationsObj }) => {
   }
   else {
     return(
-      <>
-        Done
-      </>
+      <FinishedProcessBtn />
     )
   }
 }
