@@ -96,12 +96,13 @@ class LyricraperSpider(scrapy.Spider):
 
         raw_lyrics = response.xpath('//div[@class="lyrics"]/p').get()                                
         
+        # 21:06:21 - OLD lyric class
+        # raw_lyrics = response.xpath('//div[@class="Lyrics__Container-sc-1ynbvzw-2 jgQsqn"]').getall()
         # If not found try different XPATH for lyrics
         if not raw_lyrics:
-            raw_lyrics = response.xpath(
-                '//div[@class="Lyrics__Container-sc-1ynbvzw-2 jgQsqn"]').getall()
+            raw_lyrics = response.xpath('//div[re:test(@class, "Lyrics__Container-sc-1ynbvzw")]').getall()
             raw_lyrics = '\n'.join(raw_lyrics)
-        
+
         if raw_lyrics:
             # Remove HTML tags and clean lyrics
             reg_exp_HTML = '<[^>]*>'
