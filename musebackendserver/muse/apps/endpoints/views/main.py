@@ -4,7 +4,6 @@ from rest_framework import views, status
 from rest_framework.response import Response
 from rest_framework.exceptions import APIException
 
-from muse.wsgi import registry
 from ..models import (MLAlgorithm, NLPRequest,
                     SongQueryObject, QueryStatus, Songs)
 from ..spotify_wrapper import SpotifySong

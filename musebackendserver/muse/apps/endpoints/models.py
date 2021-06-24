@@ -1,20 +1,6 @@
 from django.db import models
 
 
-class Endpoint(models.Model):
-    '''
-    The Endpoint object represents ML API endpoint.
-
-    Attributes:
-        name: The name of the endpoint, it will be used in API URL,
-        owner: The string with owner name,
-        created_at: The date when endpoint was created.
-    '''
-    name = models.CharField(max_length=128)
-    owner = models.CharField(max_length=128)
-    created_at = models.DateTimeField(auto_now_add=True, blank=False)
-
-
 class MLAlgorithm(models.Model):
     '''
     The MLAlgorithm represent the ML algorithm object.
@@ -22,11 +8,9 @@ class MLAlgorithm(models.Model):
     Attributes:
         name: The name of the algorithm.
         description: The short description of how the algorithm works.
-        code: The code of the algorithm.
         version: The version of the algorithm similar to software versioning.
         owner: The name of the owner.
         created_at: The date when MLAlgorithm was added.
-        parent_endpoint: The reference to the Endpoint.
     '''
     name = models.CharField(max_length=128)
     description = models.CharField(max_length=1000)
@@ -34,41 +18,6 @@ class MLAlgorithm(models.Model):
     version = models.CharField(max_length=128)
     owner = models.CharField(max_length=128)
     created_at = models.DateTimeField(auto_now_add=True, blank=True)
-    parent_endpoint = models.ForeignKey(Endpoint, on_delete=models.CASCADE)
-
-
-class NLPObject(models.Model):
-    '''
-    The NLPObject represent the ML algorithm object.
-
-    Attributes:
-        name: The name of the algorithm.
-        parent: The name of the parent object of origin (Song).
-        created_at: The date when NLPObject was added.
-        parent_endpoint: The reference to the Endpoint.
-    '''
-    name = models.CharField(max_length=128)
-    parent = models.CharField(max_length=128)
-    created_at = models.DateTimeField(auto_now_add=True, blank=True)
-    parent_endpoint = models.ForeignKey(Endpoint, on_delete=models.CASCADE)
-
-
-class AlgorithmStatus(models.Model):
-    '''
-    The AlgorithmStatus represent status of the MLAlgorithm which can change during the time.
-
-    Attributes:
-        status: The status of algorithm in the endpoint. Can be: testing, staging, production, ab_testing.
-        active: The boolean flag which point to currently active status.
-        created_by: The name of creator.
-        created_at: The date of status creation.
-        parent_mlalgorithm: The reference to corresponding MLAlgorithm.
-    '''
-    status = models.CharField(max_length=128)
-    active = models.BooleanField()
-    created_by = models.CharField(max_length=128)
-    created_at = models.DateTimeField(auto_now_add=True, blank=True)
-    parent_mlalgorithm = models.ForeignKey(MLAlgorithm, on_delete=models.CASCADE, related_name = "status")
 
 
 class NLPRequest(models.Model):
@@ -85,10 +34,9 @@ class NLPRequest(models.Model):
     '''
     input_data = models.CharField(max_length=10000)
     full_response = models.CharField(max_length=10000)
+    request = models.CharField(max_length=10000, blank=True)
     response = models.CharField(max_length=10000)
-    feedback = models.CharField(max_length=10000, blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True, blank=True)
-    parent_mlalgorithm = models.ForeignKey(MLAlgorithm, on_delete=models.CASCADE)
 
 
 class SongQueryObject(models.Model):
@@ -107,6 +55,7 @@ class SongQueryObject(models.Model):
     recommendations = models.CharField(max_length=10000, blank=True, null=True)
     recommendation_ids = models.CharField(max_length=10000, blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True, blank=True)
+
 
 class QueryStatus(models.Model):
     '''
@@ -137,6 +86,7 @@ class Songs(models.Model):
         art: Song Art URL
         lyrics: Lyrix
     '''
+    uuid = models.UUIDField(blank=True, null=True)
     title = models.CharField(max_length=2000)
     main_artist = models.CharField(max_length=2000)
     artist_info = models.URLField(max_length=2000, blank=True, null=True)

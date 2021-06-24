@@ -2,13 +2,9 @@ import json
 import requests
 
 from django.shortcuts import render
-from rest_framework import viewsets
-from rest_framework import mixins
-from rest_framework import views, status
+from rest_framework import views
 from rest_framework.response import Response
 from rest_framework.exceptions import APIException
-
-from muse.wsgi import registry
 
 from .usencoder.model import UniversalSentenceEncoder
 from apps.endpoints.utils import get_lyrics_from_ids_as_list
