@@ -1,4 +1,4 @@
-from .models import SongQueryObject, Songs, QueryStatus
+from .models import SongQueryObject, Song, QueryStatus
 
 
 def populate_test_db():
@@ -60,7 +60,7 @@ def populate_with_songs():
     ]
 
     for song in data:
-        songToSave = Songs(
+        songToSave = Song(
             title=song['title'],
             main_artist=song['main_artist'],
             artist_info=song['artist_info'],

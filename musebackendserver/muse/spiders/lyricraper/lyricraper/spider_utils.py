@@ -1,6 +1,6 @@
 import os
 
-from apps.endpoints.models import Songs, SongQueryObject, QueryStatus
+from apps.endpoints.models import Song, SongQueryObject, QueryStatus
 
 def defaulters_to_file(artist, song):
     """
@@ -18,7 +18,7 @@ def getSongIDsToScrape1(query):
 
     songs_requested = query.songids_to_process.split(',')
     if songs_requested:
-        QueriedSongsDict = Songs.objects.in_bulk(songs_requested)
+        QueriedSongsDict = Song.objects.in_bulk(songs_requested)
         QueriedSongsDictFiltered = dict()
         for pk, song in QueriedSongsDict.items():
             if not song.lyrics:

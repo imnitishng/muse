@@ -5,7 +5,7 @@ from rest_framework.response import Response
 from rest_framework.exceptions import APIException
 
 from ..models import (MLAlgorithm, NLPRequest,
-                    SongQueryObject, QueryStatus, Songs)
+                    SongQueryObject, QueryStatus, Song)
 from ..spotify_wrapper import SpotifySong
 from spiders.lyricraper.spider_main import run_spiders
 
@@ -124,7 +124,7 @@ class LyricsView(views.APIView):
 
             song_requested_ids = Query.recommendation_ids.split(',')
             if song_requested_ids:
-                QueriedSongsDict = Songs.objects.in_bulk(song_requested_ids)
+                QueriedSongsDict = Song.objects.in_bulk(song_requested_ids)
                 response_song_object = []
                 for song_id, song in QueriedSongsDict.items():
                     single_song_response = {
