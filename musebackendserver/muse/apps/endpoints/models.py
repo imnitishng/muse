@@ -1,6 +1,6 @@
+import uuid
 from django.db import models
-from django.db.models.fields import BLANK_CHOICE_DASH
-
+from django.db.models.fields import UUIDField
 
 
 class Song(models.Model):
@@ -17,6 +17,7 @@ class Song(models.Model):
         art: Song Art URL
         lyrics: Lyrix
     '''
+    uuid = models.UUIDField(default=uuid.uuid4, unique=True)
     title = models.CharField(max_length=2000)
     main_artist = models.CharField(max_length=2000)
     artist_info = models.URLField(max_length=2000, blank=True, null=True)
@@ -28,10 +29,11 @@ class Song(models.Model):
     track_url = models.URLField(max_length=2000, blank=True, null=True)
     preview_url = models.URLField(max_length=2000, blank=True, null=True)
     lyrics = models.CharField(max_length=20000, blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         flag = 1 if self.lyrics else 0
-        return f'{self.title} by {self.main_artist} | lyrics = {flag}'
+        return f'{self.title} - {self.main_artist} | lyrics = {flag}'
 
 
 class MLAlgorithm(models.Model):
@@ -50,7 +52,10 @@ class MLAlgorithm(models.Model):
     code = models.CharField(max_length=50000)
     version = models.CharField(max_length=128)
     owner = models.CharField(max_length=128)
-    created_at = models.DateTimeField(auto_now_add=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f'{self.name}-v{self.version} | {self.created_at}'
 
 
 class NLPRequest(models.Model):
@@ -69,7 +74,7 @@ class NLPRequest(models.Model):
     full_response = models.CharField(max_length=10000)
     request = models.CharField(max_length=10000, blank=True)
     response = models.CharField(max_length=10000)
-    created_at = models.DateTimeField(auto_now_add=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
 
 
 class TracksToID(models.Model):
@@ -82,26 +87,19 @@ class TracksToID(models.Model):
         selection_id: ID for a single query of selected songs
         track_id: Reference to a `Song` Object
     '''
-    selectionID = models.UUIDField(unique=False)
     trackID = models.ForeignKey(
         Song,
         db_index=False, 
-        null=False, 
-        blank=False, 
         on_delete=models.CASCADE
     )
-    created_at = models.DateTimeField(auto_now_add=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         abstract = True
-
-
-class UserTrackSelection(TracksToID):
-    pass
-
-
-class SpotifyTrackSelection(TracksToID):
-    pass
+    
+    def __str__(self):
+        flag = 1 if self.trackID.lyrics else 0
+        return f'{self.trackID.title} - {self.trackID.main_artist} | lyrics = {flag}'
 
 
 class UserRequest(models.Model):
@@ -114,19 +112,14 @@ class UserRequest(models.Model):
         created_at: Request creation date
     '''
     id = models.UUIDField(
-        primary_key=True,
-        null=None,
-        blank=None
-    )
-    userSelectedTracks = models.ForeignKey(
-        UserTrackSelection,
-        db_index=False,
-        null=False,
-        blank=False,
-        on_delete=models.DO_NOTHING
+        default=uuid.uuid4,
+        primary_key=True
     )
     spotifySeeds = models.TextField(max_length=2000)
-    created_at = models.DateTimeField(auto_now_add=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f'{len(self.selectedTracks.all())} tracks on {self.created_at.strftime("%d %b %Y - %H:%M")} as {self.spotifySeeds}'
 
 
 class Recommendation(models.Model):
@@ -140,22 +133,32 @@ class Recommendation(models.Model):
         created_at: The date when object was created
     '''
     id = models.UUIDField(
+        default=uuid.uuid4,
         primary_key=True,
-        null=None,
-        blank=None
     )
     userRequest = models.ForeignKey(
         UserRequest,
         db_index=False,
-        null=False,
-        blank=False,
         on_delete=models.DO_NOTHING
     )
-    spotifySelectedTracks = models.ForeignKey(
-        SpotifyTrackSelection,
-        db_index=False,
-        null=False,
-        blank=False,
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f'{len(self.selectedTracks.all())} tracks on {self.created_at.strftime("%d %b %Y - %H:%M")}'
+
+
+class UserTrackSelection(TracksToID):
+    requestObject = models.ForeignKey(
+        UserRequest,
+        related_name='selectedTracks',
+        on_delete=models.CASCADE
+    )
+
+
+class SpotifyTrackSelection(TracksToID):
+    requestObject = models.ForeignKey(
+        Recommendation,
+        related_name='selectedTracks',
         on_delete=models.CASCADE
     )
 
