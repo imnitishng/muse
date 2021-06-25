@@ -4,7 +4,7 @@ import os
 from spotipy.oauth2 import SpotifyClientCredentials
 
 from .congfigs import CLIENT_ID, CLIENT_SECRET
-from ..endpoints.models import Songs
+from ..endpoints.models import Song
 
 class SpotifySong:
     """
@@ -166,7 +166,7 @@ class SpotifySong:
                     album_art_lg, album_art_md = None, None
                 
                 # Save songs to model
-                songToSave = Songs(
+                songToSave = Song(
                     title=title,
                     main_artist=main_artist,
                     artist_info=artist_info,

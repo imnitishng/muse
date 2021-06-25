@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import SongQueryObject, Songs, QueryStatus
+from .models import SongQueryObject, Song, QueryStatus
 
 
 class SongsAdmin(admin.ModelAdmin):
@@ -24,5 +24,5 @@ class SongsQueryAdmin(admin.ModelAdmin):
 
 # Register your models here.
 admin.site.register(SongQueryObject, SongsQueryAdmin)
-admin.site.register(Songs, SongsAdmin)
+admin.site.register(Song, SongsAdmin)
 admin.site.register(QueryStatus)
