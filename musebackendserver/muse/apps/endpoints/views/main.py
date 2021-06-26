@@ -4,8 +4,7 @@ from rest_framework import views, status
 from rest_framework.response import Response
 from rest_framework.exceptions import APIException
 
-from ..models import (MLAlgorithm, NLPRequest,
-                    SongQueryObject, QueryStatus, Song)
+from ..models import (MLAlgorithm, NLPRequest, Song)
 from ..spotify_wrapper import SpotifySong
 from spiders.lyricraper.spider_main import run_spiders
 
