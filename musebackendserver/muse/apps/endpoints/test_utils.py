@@ -1,4 +1,4 @@
-from .models import SongQueryObject, Song, QueryStatus
+from .models import Song
 
 
 def populate_test_db():

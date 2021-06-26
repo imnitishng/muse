@@ -1,6 +1,5 @@
 import uuid
 from django.db import models
-from django.db.models.fields import UUIDField
 
 
 class Song(models.Model):
@@ -100,7 +99,7 @@ class UserRequest(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f'{len(self.selectedTracks.all())} tracks on {self.created_at.strftime("%d %b %Y - %H:%M")} as {self.spotifySeeds}'
+        return f'{len(self.selectedTracks.all())} tracks selected on {self.created_at.strftime("%d %b %Y - %H:%M")} as {self.spotifySeeds}'
 
 
 class Recommendation(models.Model):
@@ -124,7 +123,7 @@ class Recommendation(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f'{len(self.selectedTracks.all())} tracks on {self.created_at.strftime("%d %b %Y - %H:%M")}'
+        return f'{len(self.selectedTracks.all())} tracks recommended on {self.created_at.strftime("%d %b %Y - %H:%M")}'
 
 
 class TracksToID(models.Model):
@@ -178,36 +177,3 @@ class SpotifyTrackSelection(TracksToID):
         related_name='selectedTracks',
         on_delete=models.CASCADE
     )
-
-
-class SongQueryObject(models.Model):
-    '''
-    The SongQueryObject will keep information about the song selected by user.
-    This is the parent based on which all the recommendations will be made.
-
-    Attributes:
-        song_name: Name of the song
-        artist_name: Name of the song artist
-        recommendations: The spotify recommendations for this song in JSON format
-        created_at: The date when object was created
-    '''
-    song_name = models.CharField(max_length=200)
-    artist_name = models.CharField(max_length=200)
-    recommendations = models.CharField(max_length=10000, blank=True, null=True)
-    recommendation_ids = models.CharField(max_length=10000, blank=True, null=True)
-    created_at = models.DateTimeField(auto_now_add=True, blank=True)
-
-
-class QueryStatus(models.Model):
-    '''
-    The QueryStatus will keep track of how which music spiders have to scrape 
-    this acts like a realtime dump of song data which will be consumed by 
-    spiders to decide and filter what to scrape and what not to scrape.
-    '''
-    query_object = models.OneToOneField(
-        SongQueryObject,
-        on_delete=models.CASCADE,
-        primary_key=True,
-        related_name="Query_to_QueryStatus"
-    )
-    songids_to_process = models.CharField(max_length=10000, blank=True, null=True)

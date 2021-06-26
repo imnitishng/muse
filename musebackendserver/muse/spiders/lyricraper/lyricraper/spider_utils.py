@@ -1,6 +1,6 @@
 import os
 
-from apps.endpoints.models import Song, SongQueryObject, QueryStatus
+from apps.endpoints.models import Song
 
 def defaulters_to_file(artist, song):
     """

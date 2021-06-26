@@ -1,7 +1,6 @@
 from django.test import TestCase
 from rest_framework.test import APIClient
 
-from .models import SongQueryObject
 from .test_utils import populate_test_db
 
 class EndpointTests(TestCase):
