@@ -8,7 +8,7 @@ import uuid
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('endpoints', '0009_remove_unused_models'),
+        ('endpoints', '0011_populate_songUUID'),
     ]
 
     operations = [
@@ -37,7 +37,7 @@ class Migration(migrations.Migration):
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('created_at', models.DateTimeField(auto_now_add=True)),
                 ('requestObject', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='selectedTracks', to='endpoints.userrequest')),
-                ('trackID', models.ForeignKey(db_index=False, on_delete=django.db.models.deletion.CASCADE, to='endpoints.song')),
+                ('trackID', models.ForeignKey(db_index=False, on_delete=django.db.models.deletion.CASCADE, to='endpoints.song', to_field='uuid')),
             ],
             options={
                 'abstract': False,
@@ -49,7 +49,7 @@ class Migration(migrations.Migration):
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('created_at', models.DateTimeField(auto_now_add=True)),
                 ('requestObject', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='selectedTracks', to='endpoints.recommendation')),
-                ('trackID', models.ForeignKey(db_index=False, on_delete=django.db.models.deletion.CASCADE, to='endpoints.song')),
+                ('trackID', models.ForeignKey(db_index=False, on_delete=django.db.models.deletion.CASCADE, to='endpoints.song', to_field='uuid')),
             ],
             options={
                 'abstract': False,

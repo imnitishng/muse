@@ -8,19 +8,19 @@ import uuid
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('endpoints', '0010_add_new_models'),
+        ('endpoints', '0009_remove_unused_models'),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='song',
+            model_name='songs',
             name='created_at',
             field=models.DateTimeField(auto_now_add=True, default=django.utils.timezone.now),
             preserve_default=False,
         ),
         migrations.AddField(
-            model_name='song',
+            model_name='songs',
             name='uuid',
-            field=models.UUIDField(default=uuid.uuid4, null=True),
+            field=models.UUIDField(null=True),
         ),
     ]
