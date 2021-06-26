@@ -46,8 +46,6 @@ def populateRecommendations(apps, schema_editor):
             spotifySelectionObjList = []
             recommendation_ids_list = row.recommendation_ids.split(', ')
             for old_id in recommendation_ids_list:
-                if old_id == '511':
-                    a = 123
                 if int(old_id) in deletedSongsDict:
                     deletedSongInfo = deletedSongsDict[int(old_id)]
                     recommendedSongObj = Song.objects.filter(
@@ -75,8 +73,6 @@ def populateRecommendations(apps, schema_editor):
                         recommendedSongObj = recommendedSongObj[0]
                 else:
                     recommendedSongObj = Song.objects.filter(pk=old_id).first()
-                    if recommendedSongObj == None:
-                        a= 213
                     allSongEntriesQS = Song.objects.filter(
                         spotify_id=recommendedSongObj.spotify_id).values_list('id', 'title', 'main_artist')
 
@@ -100,7 +96,7 @@ def populateRecommendations(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('endpoints', '0012_populate_songUUID'),
+        ('endpoints', '0012_add_new_models'),
     ]
 
     operations = [

@@ -19,7 +19,9 @@ testing.*
 
 # Database
 db.sqlite3
+BACKUP_db.sqlite3.bak
 twistd.pid
+
 
 # AUTO GENERATED
 

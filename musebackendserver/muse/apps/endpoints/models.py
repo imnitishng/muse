@@ -11,13 +11,19 @@ class Song(models.Model):
     Attributes:
         id: PK for the model
         title: Name of song
-        artist: Name of artist
+        main_artist: Primary Artist of the track
+        artist_info: Info about the artist
+        all_artists: All artists for the song
         album: Name of album
-        spotify_id: Spotify song ID, works as a reference ID for scraper 
-        art: Song Art URL
+        spotify_id: Song ID from Spotify API
+        album_art_lg: Large size album art URI
+        album_art_md: Medium size album art URI
+        track_url: Spotify track play URI 
+        preview_url: Spotify short track preview URI 
         lyrics: Lyrix
+        created_at: Date of creation
     '''
-    uuid = models.UUIDField(default=uuid.uuid4, unique=True)
+    id = models.UUIDField(primary_key=True)
     title = models.CharField(max_length=2000)
     main_artist = models.CharField(max_length=2000)
     artist_info = models.URLField(max_length=2000, blank=True, null=True)
@@ -43,6 +49,7 @@ class MLAlgorithm(models.Model):
     Attributes:
         name: The name of the algorithm.
         description: The short description of how the algorithm works.
+        code: Code for the model implementation
         version: The version of the algorithm similar to software versioning.
         owner: The name of the owner.
         created_at: The date when MLAlgorithm was added.
@@ -66,9 +73,7 @@ class NLPRequest(models.Model):
         input_data: The input data to algorithm in JSON format.
         full_response: The response of the algorithm.
         response: The response of the algorithm in JSON format.
-        feedback: The feedback about the response in JSON format.
         created_at: The date when request was created.
-        parent_mlalgorithm: The reference to MLAlgorithm used to compute response.
     '''
     input_data = models.CharField(max_length=10000)
     full_response = models.CharField(max_length=10000)
@@ -77,38 +82,14 @@ class NLPRequest(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
 
-class TracksToID(models.Model):
-    '''
-    ABSTRACT MODEL
-    Stores the mapping of mutiple or single tracks/songs to a single ID
-    Each row stores 1 mapping [ID:TrackID] a
-
-    Attributes:
-        selection_id: ID for a single query of selected songs
-        track_id: Reference to a `Song` Object
-    '''
-    trackID = models.ForeignKey(
-        Song,
-        db_index=False, 
-        on_delete=models.CASCADE
-    )
-    created_at = models.DateTimeField(auto_now_add=True)
-
-    class Meta:
-        abstract = True
-    
-    def __str__(self):
-        flag = 1 if self.trackID.lyrics else 0
-        return f'{self.trackID.title} - {self.trackID.main_artist} | lyrics = {flag}'
-
-
 class UserRequest(models.Model):
     '''
-    RecommendationsRequest stores all the information from frontend request.
+    UserRequest stores information of a user request from frontend request.
+    A user request may consist of single or multiple tracks with various parameters 
+    for spotify API
 
     Attributes:
-        selected_tracks: Tracks selected by end user to fetch recommendations for 
-        seeds: Spotify music tuning parameters used to filter results
+        spotifySeeds: Spotify music tuning parameters used to filter results
         created_at: Request creation date
     '''
     id = models.UUIDField(
@@ -124,13 +105,12 @@ class UserRequest(models.Model):
 
 class Recommendation(models.Model):
     '''
-    The SongQueryObject will store information about the song selected by user.
-    This is the parent based on which all the recommendations will be made.
+    The Recommendation will store information about the recommended songs returned by Spotify
+    The recommendation will be made in response to a `UserRequest` object which is linked below
 
     Attributes:
-        userRequest: Reference to `RecommendationsRequest` Object
-        recommendationMap: 
-        created_at: The date when object was created
+        userRequest: Reference to `UserRequest` Object
+        created_at: Recommendation creation date
     '''
     id = models.UUIDField(
         default=uuid.uuid4,
@@ -147,7 +127,38 @@ class Recommendation(models.Model):
         return f'{len(self.selectedTracks.all())} tracks on {self.created_at.strftime("%d %b %Y - %H:%M")}'
 
 
+class TracksToID(models.Model):
+    '''
+    ABSTRACT MODEL
+    Stores the mapping of mutiple or single tracks related to different models
+    Each row stores 1 mapping [ID:TrackID]
+
+    Attributes:
+        selection_id: ID for a single query of selected songs
+        track_id: Reference to a `Song` Object
+    '''
+    track = models.ForeignKey(
+        Song,
+        db_index=False, 
+        on_delete=models.CASCADE
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        abstract = True
+    
+    def __str__(self):
+        flag = 1 if self.track.lyrics else 0
+        return f'{self.track.title} - {self.track.main_artist} | lyrics = {flag}'
+
+
 class UserTrackSelection(TracksToID):
+    '''
+    Store trackIDs related to a single query made by User
+
+    Attributes:
+        requestObject: Related to parent model `UserRequest`
+    '''
     requestObject = models.ForeignKey(
         UserRequest,
         related_name='selectedTracks',
@@ -156,6 +167,12 @@ class UserTrackSelection(TracksToID):
 
 
 class SpotifyTrackSelection(TracksToID):
+    '''
+    Store trackIDs related to a recommendation returned by spotify
+
+    Attributes:
+        requestObject: Related to parent model `Recommendation`
+    '''
     requestObject = models.ForeignKey(
         Recommendation,
         related_name='selectedTracks',
