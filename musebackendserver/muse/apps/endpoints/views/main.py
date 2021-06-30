@@ -4,8 +4,10 @@ from rest_framework import views, status
 from rest_framework.response import Response
 from rest_framework.exceptions import APIException
 
-from ..models import (MLAlgorithm, NLPRequest, Song)
-from ..spotify_wrapper import SpotifySong
+from ..models import (MLAlgorithm, NLPRequest, Song, UserRequest)
+from ..serializers import SongRequestSerializer
+
+from ..services.spotify import SpotifyService
 from spiders.lyricraper.spider_main import run_spiders
 
 from ..congfigs import CLIENT_SECRET_BASE64
@@ -39,40 +41,48 @@ class RecommendationsView(views.APIView):
     
     def post(self, request, format=None):
 
-        try:
-            SongEntity = SpotifySong()
-            trackObj = self.request.data.get("spotifyObj", None)
-            if trackObj:
-                trackObj = json.loads(trackObj)
-                SongEntity.initialize_track_from_request(trackObj)
-                query_song_name = SongEntity.trackInFocusObj.get('name', None)
-                query_artist_name = SongEntity.trackArtistObj.get('name', None)
-            else:
-                query_song_name = self.request.data.get("song", None)
-                query_artist_name = self.request.data.get("artist", None)
-                SongEntity.search_track(query_song_name, query_artist_name)
-                SongEntity.initialize_track(0)
-                                    
-            recommendationsObj = SongEntity.get_song_recommendations()
-
-            recommendations = SongEntity.recommendedTracks
-            recommendation_ids = str(SongEntity.recommedation_track_ids)[1:-1]
-            song_query_object = SongQueryObject(
-                song_name = query_song_name,
-                artist_name = query_artist_name,
-                recommendations = recommendations,
-                recommendation_ids = recommendation_ids
+        def build_response(recommendations):
+            # RelatedManager backward query using `related_name` attribute of FK
+            recommended_tracks_IDs = list(
+                map(
+                    lambda x: x.hex, 
+                    recommendations.selectedTracks.all().values_list('track', flat=True)
+                )
             )
-            song_query_object.save()
-            SongEntity.save_recommends_to_file()
+            recommended_tracks = list(Song.objects.filter(pk__in=recommended_tracks_IDs).values())
 
-            recommendations_response = {
-                "query_id": song_query_object.id,
-                "recommendations": SongEntity.recommendedTracks,
-                "recommendation_ids": SongEntity.recommedation_track_ids,
-                "recommendations_obj": recommendationsObj
+            return {
+                'recommendation_id': recommendations.id.hex,
+                'recommended_track_ids': recommended_tracks_IDs,
+                'recommended_tracks': recommended_tracks
             }
-            return Response(recommendations_response)
+
+        unsafe_request_data = request.data
+        request_serializer = SongRequestSerializer(data=unsafe_request_data)
+
+        if request_serializer.is_valid(raise_exception=True):
+            safe_request_data = request_serializer.data
+        
+        try:
+            trackObj = safe_request_data.get("spotifyObj")
+            spotify_service = SpotifyService()
+
+            # Storing User's requested data
+            spotify_service.initialize_track_from_request(trackObj)
+            saved_songs, fetched_songs, saved_requested_songs = spotify_service.save_songs_from_query(trackObj)
+            user_request = spotify_service.save_user_query_to_model(seeds=None)
+            spotify_service.link_songs_to_parent_objects(saved_requested_songs, user_request)
+            
+            # Storing Spotify's recommended data
+            spotifyRecommendationsDict = spotify_service.get_song_recommendations(seeds=None)
+            recommendations = spotify_service.save_recommendation_object_to_model(user_request)
+            saved_songs, fetched_songs, all_recommended_songs = spotify_service.store_songs_to_model(
+                spotifyRecommendationsDict.get('tracks')
+            )
+            spotify_service.link_songs_to_parent_objects(all_recommended_songs, recommendations)
+
+            response = build_response(recommendations)
+            return Response(response)
 
         except Exception as e:
             raise APIException(str(e))
