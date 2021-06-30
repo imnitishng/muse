@@ -22,13 +22,13 @@ class Song(models.Model):
         lyrics: Lyrix
         created_at: Date of creation
     '''
-    id = models.UUIDField(primary_key=True)
+    id = models.UUIDField(default=uuid.uuid4, primary_key=True)
     title = models.CharField(max_length=2000)
     main_artist = models.CharField(max_length=2000)
     artist_info = models.URLField(max_length=2000, blank=True, null=True)
     all_artists = models.CharField(max_length=2000, blank=True, null=True)
     album = models.CharField(max_length=2000, blank=True, null=True)
-    spotify_id = models.CharField(max_length=2000, blank=True, null=True)
+    spotify_id = models.CharField(max_length=2000, unique=True)
     album_art_lg = models.URLField(max_length=2000, blank=True, null=True)
     album_art_md = models.URLField(max_length=2000, blank=True, null=True)
     track_url = models.URLField(max_length=2000, blank=True, null=True)
