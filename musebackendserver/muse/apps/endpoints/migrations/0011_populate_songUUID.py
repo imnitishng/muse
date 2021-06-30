@@ -7,7 +7,6 @@ from django.db import migrations, models
 def populateUUIDs(apps, schema_editor):
     Songs = apps.get_model('endpoints', 'Songs')
 
-    print('\nCreating UUIDs')
     for row in Songs.objects.all():
         row.uuid = uuid.uuid4()
         row.save(update_fields=['uuid'])
@@ -15,7 +14,6 @@ def populateUUIDs(apps, schema_editor):
 def depopulateUUIDs(apps, schema_editor):
     Songs = apps.get_model('endpoints', 'Songs')
 
-    print('\nNullifying UUIDs')
     for row in Songs.objects.all():
         row.uuid = None
         row.save(update_fields=['uuid'])

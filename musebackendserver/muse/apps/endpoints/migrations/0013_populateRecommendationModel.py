@@ -90,7 +90,7 @@ def populateRecommendations(apps, schema_editor):
                     trackID=recommendedSongObj
                 ))
             SpotifyTrackSelection.objects.bulk_create(spotifySelectionObjList)
-    print(len(deletedSongsDict))
+    # print(len(deletedSongsDict))
 
 
 class Migration(migrations.Migration):
