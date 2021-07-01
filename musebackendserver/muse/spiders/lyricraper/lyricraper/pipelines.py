@@ -1,8 +1,7 @@
-from itemadapter import ItemAdapter
 import os
 import mysql.connector
 
-from apps.endpoints.models import Songs, SongQueryObject, QueryStatus
+from apps.endpoints.models import Song
 
 class MySQLPipeline(object):
     '''
@@ -61,7 +60,7 @@ class DjangoModelPipeline(object):
     This pipeline is used to store the incoming 
     data from spider to a Django model, the songs
     have already been stored in the model, this pipeline
-    will update them based on the 
+    will update them based on the lyrics that are scraped.
     '''
 
     def __init__(self):
@@ -72,18 +71,27 @@ class DjangoModelPipeline(object):
 
     def process_item(self, item, spider):   
         if item.get('type') != 'lyrics':
-            self.songs_not_found.append(item.get('song_id', 1))
+            self.songs_not_found.append(item.get('song_id'))
         else:
-            song = Songs.objects.get(pk=item.get('song_id'))
+            song = Song.objects.get(pk=item.get('song_id'))
             song.lyrics = item.get('lyrics')
             song.save()
 
     def close_spider(self, spider):
         # if spider.name == 'lyricraper_mxm':
             # os.remove("to_mxm.txt")
+        
+        # Remove log file if scraper ran flawlessly
+        current_dir = os.path.dirname(os.path.realpath(__file__))
+        logs_dir = os.path.abspath(os.path.join(current_dir, '../logs'))
+        if not spider.save_logs:
+            # os.remove(logs_dir)
+            pass
+
         if self.songs_not_found:
-            spider.UserQueryObject.songids_to_process = str(self.songs_not_found)[1:-1]
+            songs_not_found_str = ','.join(self.songs_not_found)
+            spider.RecommendationObj.emptyLyricsSongIDs = songs_not_found_str
         else:
-            spider.UserQueryObject.songids_to_process = ''
-        spider.UserQueryObject.save()
+            spider.RecommendationObj.emptyLyricsSongIDs = ''
+        spider.RecommendationObj.save()
         
