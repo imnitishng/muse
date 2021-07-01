@@ -55,3 +55,7 @@ class SongRequestSerializer(serializers.Serializer):
             json_error_str = f'Invalid JSON! {err}'
             raise serializers.ValidationError(json_error_str)
         return value
+
+
+class SpiderFetchRequestSerializer(serializers.Serializer):
+    recommendation_id = serializers.UUIDField()
