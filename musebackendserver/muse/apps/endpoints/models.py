@@ -120,6 +120,7 @@ class Recommendation(models.Model):
         db_index=False,
         on_delete=models.DO_NOTHING
     )
+    emptyLyricsSongIDs = models.CharField(default='', max_length=2000, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
