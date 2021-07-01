@@ -1,16 +1,14 @@
 import json
-from os import stat
 import requests
+
 from rest_framework import views, status
-from rest_framework import response
 from rest_framework.response import Response
 from rest_framework.exceptions import APIException
 
 from ..models import (MLAlgorithm, NLPRequest, Recommendation, Song)
-from ..serializers import SongRequestSerializer, SpiderFetchRequestSerializer
+from ..serializers import SongRequestSerializer, RecommendationIDRequestSerializer
 
 from ..services.spotify import SpotifyService
-from spiders.lyricraper.initiator import run_spiders
 
 from ..congfigs import CLIENT_SECRET_BASE64
 
@@ -39,25 +37,25 @@ class AccessToken(views.APIView):
             raise APIException(str(e))
 
 
+def build_response_for_Recommendation(recommendations):
+    # RelatedManager backward query using `related_name` attribute of FK
+    recommended_tracks_IDs = list(
+        map(
+            lambda x: x.hex, 
+            recommendations.selectedTracks.all().values_list('track', flat=True)
+        )
+    )
+    recommended_tracks = list(Song.objects.filter(pk__in=recommended_tracks_IDs).values())
+
+    return {
+        'recommendation_id': recommendations.id.hex,
+        'recommended_track_ids': recommended_tracks_IDs,
+        'recommended_tracks': recommended_tracks
+    }
+
 class RecommendationsView(views.APIView):
     
     def post(self, request, format=None):
-
-        def build_response(recommendations):
-            # RelatedManager backward query using `related_name` attribute of FK
-            recommended_tracks_IDs = list(
-                map(
-                    lambda x: x.hex, 
-                    recommendations.selectedTracks.all().values_list('track', flat=True)
-                )
-            )
-            recommended_tracks = list(Song.objects.filter(pk__in=recommended_tracks_IDs).values())
-
-            return {
-                'recommendation_id': recommendations.id.hex,
-                'recommended_track_ids': recommended_tracks_IDs,
-                'recommended_tracks': recommended_tracks
-            }
 
         unsafe_request_data = request.data
         request_serializer = SongRequestSerializer(data=unsafe_request_data)
@@ -83,44 +81,8 @@ class RecommendationsView(views.APIView):
             )
             spotify_service.link_songs_to_parent_objects(all_recommended_songs, recommendations)
 
-            response = build_response(recommendations)
+            response = build_response_for_Recommendation(recommendations)
             return Response(response)
-
-        except Exception as e:
-            raise APIException(str(e))
-
-
-class SpidersView(views.APIView):
-
-    def post(self, request, format=None):
-
-        try:
-            unsafe_request_data = request.data
-            request_serializer = SpiderFetchRequestSerializer(data=unsafe_request_data)
-
-            if request_serializer.is_valid(raise_exception=True):
-                safe_request_data = request_serializer.data
-
-            recommendation_id = safe_request_data['recommendation_id']
-            RecommendationObj = Recommendation.objects.get(pk=recommendation_id)
-            song_to_scrape_ids = RecommendationObj.selectedTracks.all().values_list('track', flat=True)
-
-            SpiderJobID = run_spiders(song_to_scrape_ids, RecommendationObj)
-
-            if SpiderJobID:
-                response = {
-                    'status': 'spider_running',
-                    'job_id': SpiderJobID,
-                    'details': 'Started spider to scrape lyrics, query `api/spiders/status` with job_id for status'
-                }
-                return Response(response, status=status.HTTP_200_OK)
-            else:
-                response = {
-                    'status': 'spider_not_run',
-                    'job_id': None,
-                    'details': 'May happen because data is already scraped or there is an exception while scheduling'
-                }
-                return Response(response, status=status.HTTP_200_OK)
 
         except Exception as e:
             raise APIException(str(e))
@@ -131,36 +93,18 @@ class LyricsView(views.APIView):
     def post(self, request, format=None):
 
         try:
-            query_id = self.request.data.get("query_id", None)
-            Query = SongQueryObject.objects.get(id=query_id)
-            queried_song_ids = Query.recommendation_ids
+            unsafe_request_data = request.data
+            request_serializer = RecommendationIDRequestSerializer(data=unsafe_request_data)
 
-            song_requested_ids = Query.recommendation_ids.split(',')
-            if song_requested_ids:
-                QueriedSongsDict = Song.objects.in_bulk(song_requested_ids)
-                response_song_object = []
-                for song_id, song in QueriedSongsDict.items():
-                    single_song_response = {
-                        'title': song.title,
-                        'artists': song.all_artists,
-                        'lyrics': song.lyrics
-                    }
-                    response_song_object.append(single_song_response)
+            if request_serializer.is_valid(raise_exception=True):
+                safe_request_data = request_serializer.data
 
-                lyrics_response = {
-                    'status': 'OK',
-                    'query_id': query_id,
-                    'songs': response_song_object
-                }
-                return Response(lyrics_response)
-            else:
-                fail_response = {
-                    'status': 'NOT OK',
-                    'query_id': query_id,
-                    'songs': 'None found in query'
-                }
-                return Response(fail_response, status=status.HTTP_400_BAD_REQUEST)
-                
+            recommendation_id = safe_request_data['recommendation_id']
+            RecommendationObj = Recommendation.objects.get(pk=recommendation_id)
+            
+            response = build_response_for_Recommendation(RecommendationObj)
+            return Response(response)
+
         except Exception as e:
             raise APIException(str(e))
 
