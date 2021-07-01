@@ -82,7 +82,10 @@ class TestSpiders(TestCase):
         self.assertEqual(songs[2].id, recommended_song_ids[1])
 
     @mock.patch('spiders.lyricraper.initiator.crawl', return_value='test_spider_job_id1234')
-    def test_lyrics_fetch(self, crawl):
+    def test_spider_start(self, crawl):
+        '''
+        Test spider job is started successfully for the given recommendation object ID
+        '''
         client = APIClient()
         payload = {
             'recommendation_id': self.recommendation_id
@@ -93,6 +96,27 @@ class TestSpiders(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.data['status'], 'spider_running')
         self.assertEqual(response.data['job_id'], 'test_spider_job_id1234')
+
+    def test_lyrics_fetch(self):
+        '''
+        Test lyrics response is fetched correctly for the given recommendation object ID
+        '''
+        client = APIClient()
+        payload = {
+            'recommendation_id': self.recommendation_id
+        }
+        url = '/api/show_lyrics'
+        response = client.post(url, payload, format='json')
+        
+        duplicates = 0
+        self.assertEqual(response.status_code, 200)
+        self.assertIsInstance(response.data['recommendation_id'], str)
+        self.assertEqual(len(response.data['recommended_track_ids']), 2)
+        self.assertEqual(len(response.data['recommended_tracks']), 2)
+        self.assertEqual(
+            len(response.data['recommended_track_ids']) - duplicates, 
+            len(response.data['recommended_tracks'])
+        )
 
     # def test_fetch_accesstoken(self):
     #     client = APIClient()
@@ -111,7 +135,3 @@ class TestSpiders(TestCase):
         
     #     self.assertEqual(response.status_code, 200)
     #     self.assertIn('running', response.data)
-
-
-# class TestModels(TestCase):
-#     pass
