@@ -23,6 +23,7 @@ def get_serialized_request_data():
 def getTwoDuplicateSongs():
     return json.loads(TWO_DUPLICATE_SPOTIFY_SONGS)
 
+
 class TestSpotifyService(TestCase):
 
     @classmethod
