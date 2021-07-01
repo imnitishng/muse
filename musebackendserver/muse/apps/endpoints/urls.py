@@ -1,7 +1,7 @@
 from django.conf.urls import url, include
 
-from .views.main import (PredictView, AccessToken, RecommendationsView, SpidersView, LyricsView)
-from .views.spider import spider_jobs_status
+from .views.main import (PredictView, AccessToken, RecommendationsView, LyricsView)
+from .views.spider import spider_jobs_status, start_spider_job
 from apps.nlp.views import ModelView
 
 urlpatterns = [
@@ -15,7 +15,7 @@ urlpatterns = [
 
     # Spider URLs
     url(
-        r"api/spiders/start", SpidersView.as_view(), name="start_spider"
+        r"api/spiders/start", start_spider_job, name="start_spider"
     ),
     url(
         r"api/spiders/status", spider_jobs_status, name="spider_status"

@@ -57,5 +57,5 @@ class SongRequestSerializer(serializers.Serializer):
         return value
 
 
-class SpiderFetchRequestSerializer(serializers.Serializer):
+class RecommendationIDRequestSerializer(serializers.Serializer):
     recommendation_id = serializers.UUIDField()
