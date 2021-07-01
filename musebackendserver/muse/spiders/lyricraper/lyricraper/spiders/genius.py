@@ -4,32 +4,44 @@ import re
 import os
 import logging
 
-from apps.endpoints.models import Songs, SongQueryObject, QueryStatus
+from apps.endpoints.models import Song, Recommendation
 
-from ..spider_utils import defaulters_to_file
+from spiders.lyricraper.utils import defaulters_to_file
 
 class LyricraperSpider(scrapy.Spider):
     # Scraper name
     name = "lyricraper_genius"
     
-    def __init__(self, user_query_id='', **kwargs):
+    def __init__(self, song_ids='', recommendation_id='', **kwargs):
+        '''
+        Initialize instance variables used to construct URLs and save data
+        during the runtime.
+        
+        Attributes:
+            songs: Saves the parsed name of a song used to construct URL for the
+                song search result. Format: <Song Name> - <Artist Name>
+            song_ids: Saves the UUIDs of the songs for model reference
+            urls_to_scrape: Saves constructed search result URLs to scrape
+            save_logs: True if the logs will be persisted in the memory in case of
+                an exception or missing lyrics. False by default
+        '''
         self.songs = []
         self.song_ids = []
         self.urls_to_scrape = []
+        self.save_logs = False
 
         if os.environ.get('SCRAPY_CHECK'):
             self.UserQueryObject = None
             pass
         else:
-            original_query = SongQueryObject.objects.get(pk=user_query_id)
-            self.UserQueryObject = QueryStatus.objects.get(pk=original_query)
-            self.songs_from_model()
+            self.RecommendationObj = Recommendation.objects.get(pk=recommendation_id)
+            self.populate_song_info_from_model(song_ids)
             
             # Parse songs to start urls for scraping
             target_urls = []
             for song in self.songs:
                 song = re.sub('\([^\}]*\)', '', song)
-                html_encoded = song.replace(' ', '+')            
+                html_encoded = song.replace(' ', '+')
                 search_url = f'https://genius.com/api/search/multi?per_page=5&q={html_encoded}'
                 target_urls.append(search_url)
             self.urls_to_scrape = target_urls[:]
@@ -70,6 +82,7 @@ class LyricraperSpider(scrapy.Spider):
                     # Any exception means we never found the searched song
                     track_url = None
         else:
+            self.save_logs = True
             logging.error("Something is wrong with website response. Exiting.")
             return
                 
@@ -81,11 +94,11 @@ class LyricraperSpider(scrapy.Spider):
                 cb_kwargs=dict(song_id=song_id)
             )
         else:
-            # If song not found then we make an entry for this using pipelines
+            self.save_logs = True
+            # If song not found using this spider then we make an entry for this using pipelines
             yield {
                 'type': 'lyrics not found',
-                'song_id': song_id,
-                'query_obj': self.UserQueryObject
+                'song_id': song_id
             }
 
     def parse_lyrics(self, response, song_id):
@@ -109,31 +122,31 @@ class LyricraperSpider(scrapy.Spider):
             lyrics = re.sub(reg_exp_HTML, '\n', raw_lyrics)
             lyrics = self.clean_spacing(lyrics)
         else:
-            lyrics = "NULL"
+            # The lyrics were found on genius but spider failed to find the DOM element with lyrics correctly
+            self.save_logs = True
+            lyrics = "scraping_failed"
         
         data['type'] = 'lyrics'
         data['lyrics'] = lyrics
         data['song_id'] = song_id
-        data['query_id'] = self.UserQueryObject.query_object.id
 
         yield data
 
-    def songs_from_model(self):
+    def populate_song_info_from_model(self, song_ids):
         '''
-        Extract songs from django model `Song` based on the query
-        recieved by the user.
+        Extract songs from django model `Song` based on the `song_ids`
+        sent as the spider parameter string.
         '''
-        if self.UserQueryObject.songids_to_process:
-            requested_songIDs = self.UserQueryObject.songids_to_process.split(',')
-            requested_songsDict = Songs.objects.in_bulk(requested_songIDs)
-            
-            for song_id, song in requested_songsDict.items():
-                if song.main_artist and song.title:
-                    parsed_songname = song.title + ' - ' + song.main_artist
-                    self.songs.append(parsed_songname)
-                    self.song_ids.append(song.id)
+        if ',' in song_ids:
+            song_ids_list = song_ids.split(',')
         else:
-            return None
+            song_ids_list = [song_ids]
+
+        songs = Song.objects.filter(pk__in=song_ids_list).values_list('id', 'title', 'main_artist')
+        for song in songs:
+            parsed_songname = song[1] + ' - ' + song[2]
+            self.songs.append(parsed_songname)
+            self.song_ids.append(song[0].hex)
 
     def songs_from_file(self, filename):
         '''

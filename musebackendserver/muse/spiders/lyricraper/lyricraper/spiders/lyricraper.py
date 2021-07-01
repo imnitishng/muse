@@ -4,7 +4,7 @@ import csv, os, json
 import mysql.connector
 import re
 
-from apps.endpoints.models import Songs, SongQueryObject
+from apps.endpoints.models import Song
 
 class LyricraperSpider(scrapy.Spider):
     # Scraper name
