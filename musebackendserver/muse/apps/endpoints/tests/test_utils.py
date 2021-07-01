@@ -1,44 +1,36 @@
 import json
 
-from ..models import Song
+from ..models import Song, UserRequest
+from ..services.spotify import SpotifyService
+from ..serializers import SongSerializer
 
 from .constants import SPOTIFY_RECOMMENDATION_JSON, SPOTIFY_SONG_JSON, MODEL_SONGS_LIST
 
 
-def populate_test_db():
-    populate_with_queries()
-    populate_with_songs()
+def populate_full_db():
+    saved_songs = populate_songs()
+    recommendations_obj = populate_parent_models(saved_songs)
+    return recommendations_obj.id.hex
 
-def populate_with_queries():
-    recommedation_list = ['nursery - bbno$', 'Reborn - KIDS SEE GHOSTS', 'SLOW DANCING IN THE DARK - Joji']
-    recommendation_ids = [1, 2, 3]
-    song_query_object = SongQueryObject(
-        song_name = "cheapskate",
-        artist_name = "oliver tree",
-        recommendations = recommedation_list,
-        recommendation_ids = str(recommendation_ids)[1:-1]
-    )
-    song_query_object.save()
+def populate_parent_models(saved_songs):
+    spotify_service = SpotifyService()
+    user_request_songs = [saved_songs[0]]
+    spotify_recommended_songs = list(saved_songs[1:])
 
-def populate_with_songs():
-    data = MODEL_SONGS_LIST
+    # Create and link parent objects
+    user_request_object = spotify_service.save_user_query_to_model()
+    spotify_service.link_songs_to_parent_objects(user_request_songs, user_request_object)
+    recommendations = spotify_service.save_recommendation_object_to_model(user_request_object)
+    spotify_service.link_songs_to_parent_objects(spotify_recommended_songs, recommendations)
 
-    for song in data:
-        songToSave = Song(
-            title=song['title'],
-            main_artist=song['main_artist'],
-            artist_info=song['artist_info'],
-            all_artists=song['all_artists'],
-            album=song['album_name'],
-            spotify_id=song['spotify_id'],
-            album_art_lg=song['album_art_lg'],
-            album_art_md=song['album_art_md'],
-            track_url=song['track_url'],
-            preview_url=song['preview_url'],
-            lyrics=song['lyrics']
-        )
-        songToSave.save()
+    return recommendations
 
+def populate_songs():
+    songs_list = MODEL_SONGS_LIST
+    serialized_data = SongSerializer(data=songs_list, many=True)
+    if serialized_data.is_valid():
+        saved_data = serialized_data.save()
+        return saved_data
 
 def getSingleSpotifyTrackJSON():
     return SPOTIFY_SONG_JSON

@@ -1,9 +1,11 @@
+from rest_framework.exceptions import APIException
+from apps.endpoints.models import Recommendation, Song
 from unittest import mock
 
 from django.test import TestCase
 from rest_framework.test import APIClient
 
-from .test_utils import populate_test_db, getSingleSpotifyTrackJSON, getTestSpotifyRecommendationJSON
+from .test_utils import populate_full_db, getSingleSpotifyTrackJSON, getTestSpotifyRecommendationJSON
 
 
 def get_complete_user_request():
@@ -57,20 +59,40 @@ class TestSpotifyRecommendations(TestCase):
 
 
 class TestSpiders(TestCase):
-    pass
-    
-    # def test_lyrics_fetch(self):
-    #     client = APIClient()
-    #     populate_test_db()
 
-    #     payload = {
-    #         'query_id': '1'
-    #     }
-    #     url = '/api/show_lyrics'
-    #     response = client.post(url, payload, format='json')
+    @classmethod
+    def setUpTestData(cls):
+        '''
+        Setup models for all tests in the class
+        '''
+        cls.recommendation_id = populate_full_db()
+    
+    def test_models_created_correctly(self):
+        '''
+        Check the data models are populated and linked together correctly
+        '''
+        songs = Song.objects.all()
+        recommendations = Recommendation.objects.get(pk=self.recommendation_id)
+        requested_song_ids = recommendations.userRequest.selectedTracks.all().values_list('track', flat=True)
+        recommended_song_ids = recommendations.selectedTracks.all().values_list('track', flat=True)
+
+        self.assertEqual(len(songs), 3)
+        self.assertEqual(songs[0].id, requested_song_ids[0])
+        self.assertEqual(songs[1].id, recommended_song_ids[0])
+        self.assertEqual(songs[2].id, recommended_song_ids[1])
+
+    @mock.patch('spiders.lyricraper.initiator.crawl', return_value='test_spider_job_id1234')
+    def test_lyrics_fetch(self, crawl):
+        client = APIClient()
+        payload = {
+            'recommendation_id': self.recommendation_id
+        }
+        url = '/api/spiders/start'
+        response = client.post(url, payload, format='json')
         
-    #     self.assertEqual(response.status_code, 200)
-    #     self.assertEqual(response.data['status'], 'OK')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data['status'], 'spider_running')
+        self.assertEqual(response.data['job_id'], 'test_spider_job_id1234')
 
     # def test_fetch_accesstoken(self):
     #     client = APIClient()
@@ -91,5 +113,5 @@ class TestSpiders(TestCase):
     #     self.assertIn('running', response.data)
 
 
-class TestModels(TestCase):
-    pass
+# class TestModels(TestCase):
+#     pass
