@@ -1,14 +1,16 @@
 import json
+from os import stat
 import requests
 from rest_framework import views, status
+from rest_framework import response
 from rest_framework.response import Response
 from rest_framework.exceptions import APIException
 
-from ..models import (MLAlgorithm, NLPRequest, Song, UserRequest)
-from ..serializers import SongRequestSerializer
+from ..models import (MLAlgorithm, NLPRequest, Recommendation, Song)
+from ..serializers import SongRequestSerializer, SpiderFetchRequestSerializer
 
 from ..services.spotify import SpotifyService
-from spiders.lyricraper.spider_main import run_spiders
+from spiders.lyricraper.initiator import run_spiders
 
 from ..congfigs import CLIENT_SECRET_BASE64
 
@@ -93,30 +95,32 @@ class SpidersView(views.APIView):
     def post(self, request, format=None):
 
         try:
-            query_id = self.request.data.get("query_id", None)
-            Query = SongQueryObject.objects.get(id=query_id)
-            queried_song_ids = Query.recommendation_ids
+            unsafe_request_data = request.data
+            request_serializer = SpiderFetchRequestSerializer(data=unsafe_request_data)
 
-            # Clone query info to process and use later
-            cloned_query = QueryStatus(
-                query_object=Query,
-                songids_to_process=queried_song_ids
-            )
-            cloned_query.save()
+            if request_serializer.is_valid(raise_exception=True):
+                safe_request_data = request_serializer.data
 
-            JobID = run_spiders(cloned_query)
+            recommendation_id = safe_request_data['recommendation_id']
+            RecommendationObj = Recommendation.objects.get(pk=recommendation_id)
+            song_to_scrape_ids = RecommendationObj.selectedTracks.all().values_list('track', flat=True)
 
-            if JobID:
-                spider_job_response = {
-                    'status': 'Spider Running',
-                    'job_id': JobID
+            SpiderJobID = run_spiders(song_to_scrape_ids, RecommendationObj)
+
+            if SpiderJobID:
+                response = {
+                    'status': 'spider_running',
+                    'job_id': SpiderJobID,
+                    'details': 'Started spider to scrape lyrics, query `api/spiders/status` with job_id for status'
                 }
+                return Response(response, status=status.HTTP_200_OK)
             else:
-                spider_job_response = {
-                    'status': 'Spider failed to run',
-                    'job_id': JobID
+                response = {
+                    'status': 'spider_not_run',
+                    'job_id': None,
+                    'details': 'May happen because data is already scraped or there is an exception while scheduling'
                 }
-            return Response(spider_job_response)
+                return Response(response, status=status.HTTP_200_OK)
 
         except Exception as e:
             raise APIException(str(e))
