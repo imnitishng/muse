@@ -5,11 +5,11 @@ from rest_framework import views, status
 from rest_framework.response import Response
 from rest_framework.exceptions import APIException
 
-from ..models import (MLAlgorithm, NLPRequest, Recommendation, Song)
+from ..models import Recommendation
 from ..serializers import SongRequestSerializer, RecommendationIDRequestSerializer
 
+from .utils import get_tracks_dict_from_recommendation_object
 from ..services.spotify import SpotifyService
-
 from ..congfigs import CLIENT_SECRET_BASE64
 
 
@@ -36,22 +36,6 @@ class AccessToken(views.APIView):
         except Exception as e:
             raise APIException(str(e))
 
-
-def build_response_for_Recommendation(recommendations):
-    # RelatedManager backward query using `related_name` attribute of FK
-    recommended_tracks_IDs = list(
-        map(
-            lambda x: x.hex, 
-            recommendations.selectedTracks.all().values_list('track', flat=True)
-        )
-    )
-    recommended_tracks = list(Song.objects.filter(pk__in=recommended_tracks_IDs).values())
-
-    return {
-        'recommendation_id': recommendations.id.hex,
-        'recommended_track_ids': recommended_tracks_IDs,
-        'recommended_tracks': recommended_tracks
-    }
 
 class RecommendationsView(views.APIView):
     
@@ -81,7 +65,7 @@ class RecommendationsView(views.APIView):
             )
             spotify_service.link_songs_to_parent_objects(all_recommended_songs, recommendations)
 
-            response = build_response_for_Recommendation(recommendations)
+            response = get_tracks_dict_from_recommendation_object(recommendations)
             return Response(response)
 
         except Exception as e:
@@ -102,7 +86,7 @@ class LyricsView(views.APIView):
             recommendation_id = safe_request_data['recommendation_id']
             RecommendationObj = Recommendation.objects.get(pk=recommendation_id)
             
-            response = build_response_for_Recommendation(RecommendationObj)
+            response = get_tracks_dict_from_recommendation_object(RecommendationObj)
             return Response(response)
 
         except Exception as e:
