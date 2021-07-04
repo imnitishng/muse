@@ -1,4 +1,4 @@
-import os, pathlib, json, re, requests
+import re, requests
 
 from django.conf import settings
 

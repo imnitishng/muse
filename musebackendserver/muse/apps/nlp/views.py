@@ -1,12 +1,13 @@
 import json
-import requests
 
-from django.shortcuts import render
 from rest_framework import views
 from rest_framework.response import Response
 from rest_framework.exceptions import APIException
 
 from .usencoder.model import UniversalSentenceEncoder
+from apps.nlp.serializers import ModelRequestSerializer
+from apps.endpoints.models import Recommendation, Song
+from apps.endpoints.views.utils import get_tracks_dict_from_recommendation_object
 from apps.endpoints.utils import get_lyrics_from_ids_as_list
 
 class ModelView(views.APIView):
@@ -42,43 +43,51 @@ class ModelView(views.APIView):
     def post(self, request, format=None):
 
         try:
-            request_type = self.request.data.get('type', 'full')
-            model_name = self.request.data.get('model', 'use')
+            unsafe_request_data = request.data
+            request_serializer = ModelRequestSerializer(data=unsafe_request_data)
+
+            if request_serializer.is_valid(raise_exception=True):
+                safe_request_data = request_serializer.data
+
+            recommendation_id = safe_request_data['recommendation_id']
+            model_code = safe_request_data['model_code']
+
+            RecommendationObj = Recommendation.objects.get(pk=recommendation_id)
+            recommended_tracks_dict = get_tracks_dict_from_recommendation_object(RecommendationObj)
+            user_requested_tracks_ids = RecommendationObj.userRequest.selectedTracks.all().values_list('track', flat=True)
+            user_requested_tracks_qs = Song.objects.filter(pk__in=user_requested_tracks_ids)
+            
+            # Perpend user requested songs to top for correlation score
             song_ids, song_lyrics = [], []
+            for song in user_requested_tracks_qs:
+                song_ids.append(song.id.hex)
+                song_lyrics.append(song.lyrics)
 
-            if request_type == 'full':
-                songs_data = self.request.data.get('songs', None)
-                
-                for song in songs_data:
-                    if song:
-                        song_ids.append(list(song.keys())[0])
-                        song_lyrics.append(list(song.values())[0])
-            else:
-                song_ids = self.request.data.get('songs', None)
-                song_lyrics = get_lyrics_from_ids_as_list(song_ids)
+            recommended_tracks_list = recommended_tracks_dict['recommended_tracks']
+            for song in recommended_tracks_list:
+                song_ids.append(song['id'].hex)
+                song_lyrics.append(song['lyrics'])
 
-
-            if model_name == 'use':
+            if model_code == 'use':
                 Model = UniversalSentenceEncoder()
 
             preprocessed_lyrics = Model.pre_processing(song_lyrics)
             payload = {
                 'data': preprocessed_lyrics
             }
-
             # TODO: Send payload one by one based on the memory of the machine
             model_response = Model.get_model_results(payload)
             
             if model_response.status_code == 200:
                 ranks = self.buildresponse(song_ids, preprocessed_lyrics, json.loads(model_response.text))
                 response = {
-                    'status': 'OK',
+                    'status': 'success',
                     'ranks': ranks
                 }
             else:
                 response = {
-                    'error': 'There was a problem in getting the embeddings.',
-                    'status': 'NOT OK'
+                    'status': 'error',
+                    'error': 'There was a problem in getting the embeddings.'
                 }
             return Response(response)
 
