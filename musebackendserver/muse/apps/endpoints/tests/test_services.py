@@ -1,6 +1,5 @@
 import json
 
-from apps.endpoints.models import UserRequest
 from unittest import mock
 
 from django.test import TestCase

@@ -1,11 +1,23 @@
-import json
+import json, requests
 
-from ..models import Song, UserRequest
 from ..services.spotify import SpotifyService
 from ..serializers import SongSerializer
 
 from .constants import SPOTIFY_RECOMMENDATION_JSON, SPOTIFY_SONG_JSON, MODEL_SONGS_LIST
 
+
+def getTestRanks():
+    res = requests.Response()
+    res.status_code = 200
+    res._content = b'{"status": "success", "ranks": "testranks"}'
+    return res
+
+def getModelRanksResponse():
+    return {
+        'asdasd': 0.32,
+        'qweadf': 0.69,
+        'fghfgb': 0.52
+    }
 
 def populate_full_db():
     saved_songs = populate_songs()
