@@ -10,7 +10,7 @@ from ..serializers import SongRequestSerializer, RecommendationIDRequestSerializ
 
 from .utils import get_tracks_dict_from_recommendation_object
 from ..services.spotify import SpotifyService
-from ..congfigs import CLIENT_SECRET_BASE64
+from muse.settings import SPOTIFY_CLIENT_SECRET_BASE64
 
 
 class AccessToken(views.APIView):
@@ -19,7 +19,7 @@ class AccessToken(views.APIView):
         try:
             spotifyTokenURL = 'https://accounts.spotify.com/api/token'
             headers = {
-                'Authorization': f'Basic {CLIENT_SECRET_BASE64}',
+                'Authorization': f'Basic {SPOTIFY_CLIENT_SECRET_BASE64}',
                 'content-type': 'application/x-www-form-urlencoded'
             }
             payload = {

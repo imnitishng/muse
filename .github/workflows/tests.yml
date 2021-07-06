@@ -10,6 +10,12 @@ on:
 jobs:
   health-check-job: 
     runs-on: ubuntu-18.04
+    env:
+      SPOTIFY_CLIENT_ID: 'test_client_id'
+      SPOTIFY_CLIENT_SECRET: 'test_client_secret'
+      SPOTIFY_AUTH_CODE: 'test_key'
+      SPOTIFY_CLIENT_SECRET_BASE64: 'test_key'
+      SPOTIFY_ACESS_TOKEN: 'test_key'
 
     steps:
       - name: Checkout code 
@@ -26,17 +32,11 @@ jobs:
         with:
           python-version: '3.6'
 
-      - name: Check Python version
-        run: python --version
-
       - name: Install requirements
         run: pip install -r requirements.txt
-
-      - name: Change dir and list
-        run: cd musebackendserver/muse/ && ls -al
 
       - name: Run Migrations
         run: python musebackendserver/muse/manage.py migrate
 
       - name: Run Test
-        run: python manage.py test apps.endpoints.tests && python manage.py test apps.nlp.tests
+        run: python musebackendserver/muse/manage.py test apps.endpoints.tests && python musebackendserver/muse/manage.py test apps.nlp.tests
