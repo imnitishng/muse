@@ -1,0 +1,42 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [master]
+    types: [opened, synchronize]
+
+jobs:
+  health-check-job: 
+    runs-on: ubuntu-18.04
+
+    steps:
+      - name: Checkout code 
+        uses: actions/checkout@v2
+
+      - name: Cache python dependencies
+        uses: actions/cache@v2
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+
+      - name: Setup python environment
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.6'
+
+      - name: Check Python version
+        run: python --version
+
+      - name: Install requirements
+        run: pip install -r requirements.txt
+
+      - name: Change dir and list
+        run: cd musebackendserver/muse/ && ls -al
+
+      - name: Run Migrations
+        run: python musebackendserver/muse/manage.py migrate
+
+      - name: Run Test
+        run: python manage.py test apps.endpoints.tests && python manage.py test apps.nlp.tests
