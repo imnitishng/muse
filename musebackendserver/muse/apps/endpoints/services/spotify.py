@@ -9,7 +9,7 @@ from apps.endpoints.models import Song, UserRequest
 from ..serializers import (SongSerializer, UserRequestSerializer, 
     RecommendationSerializer, UserTrackSelectionSeriializer, SpotifyTrackSelectionSeriializer)
 
-from ..congfigs import CLIENT_ID, CLIENT_SECRET
+from muse.settings import SPOTIFY_CLIENT_ID, SPOTIFY_CLIENT_SECRET
 from ..utils import ignore_invalid_and_save_list, is_duplicate_song_serializer_error
 
 
@@ -26,8 +26,8 @@ class SpotifyService:
 
         self.client = spotipy.Spotify(
             auth_manager = SpotifyClientCredentials(
-            client_id=CLIENT_ID,
-            client_secret=CLIENT_SECRET))
+            client_id=SPOTIFY_CLIENT_ID,
+            client_secret=SPOTIFY_CLIENT_SECRET))
 
     def initialize_track_from_request(self, trackObj):
         """
