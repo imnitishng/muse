@@ -1,5 +1,25 @@
+import os
 from pathlib import Path
 
+from django.core.exceptions import ImproperlyConfigured
+
+# Get 3rd party environment variables
+def get_env_value(env_variable):
+    try:
+      	return os.environ[env_variable]
+    except KeyError:
+        error_msg = f'Set the {env_variable} environment variable'
+        raise ImproperlyConfigured(error_msg)
+
+
+SPOTIFY_CLIENT_ID = get_env_value('SPOTIFY_CLIENT_ID')
+SPOTIFY_CLIENT_SECRET = get_env_value('SPOTIFY_CLIENT_SECRET')
+SPOTIFY_AUTH_CODE = get_env_value('SPOTIFY_AUTH_CODE')
+SPOTIFY_CLIENT_SECRET_BASE64 = get_env_value('SPOTIFY_CLIENT_SECRET_BASE64')
+SPOTIFY_ACCESS_TOKEN = get_env_value('SPOTIFY_CLIENT_SECRET_BASE64')
+
+
+# Django Settings
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
