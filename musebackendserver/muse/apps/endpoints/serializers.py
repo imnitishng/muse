@@ -41,8 +41,6 @@ class SpotifyTrackSelectionSeriializer(serializers.ModelSerializer):
 
 
 class SongRequestSerializer(serializers.Serializer):
-    song = serializers.CharField(max_length=50)
-    artist = serializers.CharField(max_length=50)
     spotifyObj = serializers.JSONField()
 
     def validate_spotifyObj(self, value):

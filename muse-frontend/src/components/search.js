@@ -99,7 +99,9 @@ const Search = () => {
   return (
     <div className="mt-28 w-5/6 self-center">
       <label className="font-mono text-gray-700 text-lg">
-        <input id="search"
+        <input
+          id="search"
+          autoComplete="off"
           className="border-4 border-transparent border-purple-600 w-full h-8 mx-auto rounded-md focus:border-teal-400"
           onChange={handleSearchChange}
           onFocus={() => setShowSuggestions(true)}

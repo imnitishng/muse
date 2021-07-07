@@ -50,10 +50,9 @@ const StatusDisplay = ({ recommendationsObj }) => {
   }
 
   const getTrackRanks = async () => {
-    const recommendation_ids = recommendationsObj.recommendations.map((e) => (e.id))
     const rankToastID = toast.loading('Ranking Tracks')
 
-    const response = await fetchRanks(recommendation_ids)
+    const response = await fetchRanks(recommendationsObj.query_id)
     toast.success('Done!', {
       id: rankToastID,
       duration: 3000
@@ -62,6 +61,12 @@ const StatusDisplay = ({ recommendationsObj }) => {
     setSpiderJobStatus('dead')
     dispatch(assignRanksToTracks(response, recommendationsObj))
   }
+
+  useEffect(() => {
+    if(spiderJobStatus === 'finished')
+      getTrackRanks()
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [spiderJobStatus])
 
   if(spiderJobStatus === 'waiting') {
     return (
@@ -83,7 +88,6 @@ const StatusDisplay = ({ recommendationsObj }) => {
     )
   }
   else if(spiderJobStatus === 'finished') {
-    getTrackRanks()
     return (
       <>
         <RanksLoadingBtn />

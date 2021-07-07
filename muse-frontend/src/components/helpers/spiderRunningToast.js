@@ -21,8 +21,7 @@ const SpiderRunningToast = ({ tracks }) => {
     REFRESH_RATE
   )
 
-  const trackImgURL = tracks[trackIndex].info.album.images[0].url
-  console.log(trackImgURL)
+  const trackImgURL = tracks[trackIndex].info.album_art_lg
 
   return (
     <div className='flex flex-col justify-around w-4/12 bg-white shadow-2xl rounded-md text-center text-sm md:w-3/12 lg:w-1.5/12'>
