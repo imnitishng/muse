@@ -10,24 +10,23 @@ export const infoReducer = (state = initialState, action) => {
   const toTrackObj = (track) => ({
     rank: null,
     id: track[0],
-    nameToShow: track[1],
-    info: track[2],
+    nameToShow: `${track[1].title} - ${track[1].main_artist}`,
+    info: track[1],
   })
 
   switch(action.type) {
 
   case 'ADD_SPOTIFY_RCMDS': {
     const combinedArr = _.zip(
-      action.data.recommendation_ids,
-      action.data.recommendations,
-      action.data.recommendations_obj.tracks
+      action.data.recommended_track_ids,
+      action.data.recommended_tracks
     )
     const recommendations = combinedArr.map(
       (track) => (toTrackObj(track))
     )
 
     return {
-      query_id: action.data.query_id,
+      query_id: action.data.recommendation_id,
       recommendations: recommendations
     }
   }

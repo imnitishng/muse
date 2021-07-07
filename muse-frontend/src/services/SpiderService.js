@@ -4,9 +4,8 @@ const baseURL = 'http://127.0.0.1:8000/api/spiders'
 
 export const startLyricsFetch = async (queryID) => {
   const requestBody = {
-    query_id: queryID
+    recommendation_id: queryID
   }
-
   const response = await axios.post(`${baseURL}/start`, requestBody)
   return response
 }
