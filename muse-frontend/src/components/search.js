@@ -3,7 +3,7 @@ import { useSelector, useDispatch } from 'react-redux'
 
 import spotifyService from '../services/SpotifyService'
 import { sendSearchedTrackInfo } from '../services/BackendService'
-import { addSearchResults, clearSearchResults } from '../reducers/searchReducers'
+import { addSearchResults, clearSearchResults, addUserTrackSelection } from '../reducers/searchReducers'
 import { addSpotifyRecommendations } from '../reducers/infoReducers'
 import { changeAppLayout } from '../reducers/styleReducers'
 
@@ -14,6 +14,7 @@ const ResultEntrySong = ({ setShowSuggestions, item, itemImage, itemName, itemAr
   const handleSearchClick = async (event) => {
     event.preventDefault()
     setShowSuggestions(false)
+    dispatch(addUserTrackSelection(item))
     const response = await sendSearchedTrackInfo(item)
     dispatch(addSpotifyRecommendations(response.data))
     dispatch(changeAppLayout('withResults'))
