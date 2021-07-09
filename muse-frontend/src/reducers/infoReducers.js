@@ -2,7 +2,7 @@ var _ = require('lodash')
 
 const initialState = {
   query_id: null,
-  recommendations: null
+  recommendations: null,
 }
 
 export const infoReducer = (state = initialState, action) => {
@@ -26,6 +26,7 @@ export const infoReducer = (state = initialState, action) => {
     )
 
     return {
+      ...state,
       query_id: action.data.recommendation_id,
       recommendations: recommendations
     }
@@ -50,7 +51,7 @@ export const infoReducer = (state = initialState, action) => {
     ).reverse()
 
     return {
-      query_id: action.recommendationsObj.query_id,
+      ...state,
       recommendations: sortedRecommendations
     }
   }
