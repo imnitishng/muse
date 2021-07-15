@@ -2,6 +2,7 @@ import React from 'react'
 import { useSelector } from 'react-redux'
 
 import StatusDisplay from './statusdisplay'
+import GranularitySlider from './granularityPanel'
 
 const RecommendationsTuner = () => {
 
@@ -9,7 +10,10 @@ const RecommendationsTuner = () => {
 
   return (
     <div>
-      <StatusDisplay recommendationsObj={recommendationsObj}/>
+      <GranularitySlider />
+      <div className="mt-5">
+        <StatusDisplay recommendationsObj={recommendationsObj}/>
+      </div>
     </div>
   )
 }
