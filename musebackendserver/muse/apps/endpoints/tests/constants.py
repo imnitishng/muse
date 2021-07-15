@@ -40,6 +40,16 @@ MODEL_SONGS_LIST = [
         }
     ]
 
+SEEDS_FOR_RECOMMENDATIONS = {
+  'Popularity': 50,
+  'Energy': 0.5,
+  'Acousticness': 0.5,
+  'Tempo': 130,
+  'Danceability': 0.5,
+  'Instrumentalness': 0.5,
+  'Speechiness': 0.5,
+}
+
 SPOTIFY_SONG_JSON = '''
     {
         "album": {

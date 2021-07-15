@@ -3,7 +3,7 @@ import json, requests
 from ..services.spotify import SpotifyService
 from ..serializers import SongSerializer
 
-from .constants import SPOTIFY_RECOMMENDATION_JSON, SPOTIFY_SONG_JSON, MODEL_SONGS_LIST
+from .constants import SPOTIFY_RECOMMENDATION_JSON, SPOTIFY_SONG_JSON, MODEL_SONGS_LIST, SEEDS_FOR_RECOMMENDATIONS
 
 
 def getTestRanks():
@@ -50,3 +50,9 @@ def getSingleSpotifyTrackJSON():
 def getTestSpotifyRecommendationJSON():
     recommendation_json = SPOTIFY_RECOMMENDATION_JSON
     return json.loads(recommendation_json)
+
+def getTestRecommendationSeeds():
+    return SEEDS_FOR_RECOMMENDATIONS
+
+def getTestRecommendationSeedsJSON():
+    return json.dumps(SEEDS_FOR_RECOMMENDATIONS)
