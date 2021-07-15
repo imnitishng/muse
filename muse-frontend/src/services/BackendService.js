@@ -16,3 +16,12 @@ export const sendSearchedTrackInfo = async (trackObj) => {
   return response
 }
 
+export const getRecommendationWithSeeds = async (trackObj, seeds) => {
+  const requestBody = {
+    spotifyObj: JSON.stringify(trackObj),
+    seeds: JSON.stringify(seeds)
+  }
+
+  const response = await axios.post(`${baseURL}/recommendations`, requestBody)
+  return response
+}
