@@ -5,20 +5,18 @@ from unittest import mock
 from django.test import TestCase
 from rest_framework.test import APIClient
 
-from .test_utils import populate_full_db, getSingleSpotifyTrackJSON, getTestSpotifyRecommendationJSON
+from .test_utils import populate_full_db, getSingleSpotifyTrackJSON, getTestSpotifyRecommendationJSON, getTestRecommendationSeedsJSON
 
 
-def get_complete_user_request():
+def get_user_request_without_seeds():
     return {
-        'song': 'cheapskate',
-        'artist': 'oliver tree',
         'spotifyObj': getSingleSpotifyTrackJSON()
     }
 
-def get_incomplete_user_request():
+def get_user_request_with_seeds():
     return {
-        'song': 'cheapskate',
-        'artist': 'oliver tree',
+        'spotifyObj': getSingleSpotifyTrackJSON(),
+        'seeds': getTestRecommendationSeedsJSON()
     }
 
 
@@ -34,9 +32,9 @@ class TestSpotifyRecommendations(TestCase):
 
     url = '/api/spotify/recommendations'
 
-    def test_recommendations_complete_request(self, get_song_recommendations):
+    def test_recommendations_without_seeds(self, get_song_recommendations):
         client = APIClient()
-        payload = get_complete_user_request()
+        payload = get_user_request_without_seeds()
         response = client.post(self.url, payload, format='json')
 
         # Explicitly defining duplicates for a rare test case
@@ -50,12 +48,20 @@ class TestSpotifyRecommendations(TestCase):
             len(response.data['recommended_tracks'])
         )
 
-    def test_recommendations_incomplete_request(self, get_song_recommendations):
+    def test_recommendations_with_seeds(self, get_song_recommendations):
         client = APIClient()
-        payload = get_incomplete_user_request()
+        payload = get_user_request_with_seeds()
         response = client.post(self.url, payload, format='json')
 
-        self.assertEqual(response.status_code, 400)
+        duplicates = 2
+        self.assertEqual(response.status_code, 200)
+        self.assertIsInstance(response.data['recommendation_id'], str)
+        self.assertEqual(len(response.data['recommended_track_ids']), 38)
+        self.assertEqual(len(response.data['recommended_tracks']), 36)
+        self.assertEqual(
+            len(response.data['recommended_track_ids']) - duplicates, 
+            len(response.data['recommended_tracks'])
+        )
 
 
 class TestSpiders(TestCase):

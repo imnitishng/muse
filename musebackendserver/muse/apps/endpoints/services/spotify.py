@@ -40,17 +40,52 @@ class SpotifyService:
         self.trackArtistObj = self.trackInFocusObj.get('artists')[0]
         self.trackArtistID = self.trackArtistObj.get('id')
             
+    def getSeedMinMaxValues(self, seeds):
+        '''
+        The frontend slider for setting track features is very shallow since it only has
+        10 possible values so we try to improve that limitation by modifying
+        the input seed values to a more detailed request value in order to get 
+        better recommendations and minimize outliers because of peculiar values supplied
+        by the user.
+        
+        Eg: 
+        A target value for speechiness set from frontend: 0.5
+        Updated value for speechiness sent to spotify: min_speechiness = 0.4, max_speechiness = 0.5
+        '''
+        newSeeds = dict()
+        for name, val in seeds.items():
+            if name == 'Tempo':
+                newSeeds['min_tempo'] = int(val) - 20
+                newSeeds['max_tempo'] = int(val) + 20
+            elif name == 'Popularity':
+                newSeeds['min_popularity'] = int(val) - 5
+                newSeeds['max_popularity'] = int(val) + 5
+            else:
+                newSeeds[f'target_{name.lower()}'] = float(val)
+        return newSeeds
+    
     def get_song_recommendations(self, seeds=None):
         """
         Get song recommendations for a song
         """
         if self.trackInFocusID:
             if not seeds:
+                # If no seeds are sent in the request, i.e. the first request then use default values
+                response = self.client.recommendations(
+                    seed_tracks=[self.trackInFocusID],
+                    limit=50
+                )
+                return response
+            else:
+                # If seeds are sent in the request, i.e. user request songs using granularity slider
+                SeedValuesDict = self.getSeedMinMaxValues(seeds)
                 response = self.client.recommendations(
                     seed_tracks=[self.trackInFocusID],
                     limit=50,
-                    max_speechiness=0.60)
+                    **SeedValuesDict
+                )
                 return response
+
         else:
             raise APIException("Spotify Service is not initialized. Check `trackObj` in request")
 

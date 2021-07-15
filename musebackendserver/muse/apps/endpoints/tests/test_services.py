@@ -7,13 +7,13 @@ from rest_framework.exceptions import APIException
 
 from ..services.spotify import SpotifyService
 from ..serializers import SongRequestSerializer
-from .test_api import get_complete_user_request
-from .test_utils import getTestSpotifyRecommendationJSON
+from .test_api import get_user_request_without_seeds 
+from .test_utils import getTestSpotifyRecommendationJSON, getTestRecommendationSeeds
 from .constants import TWO_DUPLICATE_SPOTIFY_SONGS
 
 
 def get_serialized_request_data():
-    request = get_complete_user_request()
+    request = get_user_request_without_seeds()
     request_serializer = SongRequestSerializer(data=request)
     if request_serializer.is_valid():
         return request_serializer.data
@@ -70,13 +70,30 @@ class TestSpotifyService(TestCase):
         self.assertEqual(saved_song.title, 'Cut To The Feeling')
         self.assertEqual(saved_song.spotify_id, '11dFghVXANMlKmJXsNCbNl')
 
-
     def test_get_song_recommendations_unintialized(self):
         '''
         Test spotify recommendations are not fetched when service is not initialized with 
         requested track from the user.
         '''
         self.assertRaises(APIException, lambda: self.spotify_service.get_song_recommendations(None))
+
+    def test_setting_recommendation_seed_values(self):
+        '''
+        Test the spotify seed values sent from the frontend are transformed to valid seed min and max
+        values based on the logic decided.
+        '''
+        seeds = getTestRecommendationSeeds()
+        SeedValuesDict = self.spotify_service.getSeedMinMaxValues(seeds)
+
+        self.assertEqual(SeedValuesDict['min_popularity'], 45)
+        self.assertEqual(SeedValuesDict['max_popularity'], 55)
+        self.assertEqual(SeedValuesDict['min_tempo'], 110)
+        self.assertEqual(SeedValuesDict['max_tempo'], 150)
+        self.assertEqual(SeedValuesDict['target_energy'], 0.5)
+        self.assertEqual(SeedValuesDict['target_acousticness'], 0.5)
+        self.assertEqual(SeedValuesDict['target_danceability'], 0.5)
+        self.assertEqual(SeedValuesDict['target_instrumentalness'], 0.5)
+        self.assertEqual(SeedValuesDict['target_speechiness'], 0.5)
 
     @mock.patch('apps.endpoints.services.spotify.SpotifyService.get_song_recommendations', return_value=getTestSpotifyRecommendationJSON())
     def test_get_song_recommendations_intialized(self, get_song_recommendations):

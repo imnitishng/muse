@@ -49,16 +49,17 @@ class RecommendationsView(views.APIView):
         
         try:
             trackObj = safe_request_data.get("spotifyObj")
+            seeds = safe_request_data.get("seeds", None)
             spotify_service = SpotifyService()
 
             # Storing User's requested data
             spotify_service.initialize_track_from_request(trackObj)
             saved_songs, fetched_songs, saved_requested_songs = spotify_service.save_songs_from_query(trackObj)
-            user_request = spotify_service.save_user_query_to_model(seeds=None)
+            user_request = spotify_service.save_user_query_to_model(seeds=seeds)
             spotify_service.link_songs_to_parent_objects(saved_requested_songs, user_request)
             
             # Storing Spotify's recommended data
-            spotifyRecommendationsDict = spotify_service.get_song_recommendations(seeds=None)
+            spotifyRecommendationsDict = spotify_service.get_song_recommendations(seeds=seeds)
             recommendations = spotify_service.save_recommendation_object_to_model(user_request)
             saved_songs, fetched_songs, all_recommended_songs = spotify_service.store_songs_to_model(
                 spotifyRecommendationsDict.get('tracks')
