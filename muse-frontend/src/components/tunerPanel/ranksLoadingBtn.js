@@ -6,7 +6,7 @@ const RanksLoadingBtn = () => {
     bg-transparent
     text-sm text-green-700 font-semibold 
     hover:text-white cursor-wait
-    py-2 px-4 h-8 md:h-12
+    py-2 px-4 h-8 md:h-12 justify-center
     border border-blue-500`
   const btnContent = 'Ranking Tracks'
 

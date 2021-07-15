@@ -7,7 +7,7 @@ const SpiderReadyBtn = ({ handleGetLyrics }) => {
     transition duration-500 ease-in-out 
     bg-transparent hover:bg-blue-500 text-blue-700 
     font-semibold text-sm hover:text-white 
-    py-2 px-4 h-8 md:h-12
+    py-2 px-4 h-8 md:h-12 w-full justify-center
     border border-blue-500 hover:border-transparent`
 
   return  (

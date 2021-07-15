@@ -27,7 +27,7 @@ const SpiderRunningBtn = ({ setSpiderJobStatus, crawlerKey }) => {
     bg-transparent hover:bg-blue-500 
     text-sm text-green-700 font-semibold 
     hover:text-white cursor-wait
-    py-2 px-4 h-8 md:h-12
+    py-2 px-4 h-8 md:h-12 justify-center
     border border-blue-500 hover:border-transparent`
   const btnContent = 'Fetching Lyrics'
 

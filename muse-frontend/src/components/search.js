@@ -39,7 +39,7 @@ const ResultEntrySong = ({ setShowSuggestions, item, itemImage, itemName, itemAr
 const SearchList = ({ results, setShowSuggestions }) => {
 
   return (
-    <div className="w-full z-10 md:absolute bg-white border-gray-100 border-2 shadow-2xl">
+    <div className="w-full z-10 absolute bg-white border-gray-100 border-2 shadow-2xl">
       <ul className="text-sm">
         {results.map(item =>
           <ResultEntrySong
