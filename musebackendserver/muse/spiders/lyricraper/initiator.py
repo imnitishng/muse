@@ -1,5 +1,6 @@
 from scrapy.utils.log import configure_logging
 from scrapyd_api import ScrapydAPI
+from scrapyd_client.utils import get_config
 
 from .utils import getSongIDsToScrape1
 
@@ -25,4 +26,6 @@ def crawl(song_ids_arg, recommendation_id_hex):
     return spider_job_id
 
 def get_spider_instance():
-    return ScrapydAPI('http://localhost:6800')
+    DEFAULT_TARGET_URL = 'http://localhost:6800'
+    target_url = get_config('deploy', 'url', fallback=DEFAULT_TARGET_URL).rstrip('/')
+    return ScrapydAPI(target_url)
