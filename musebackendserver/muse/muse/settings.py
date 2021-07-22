@@ -11,13 +11,18 @@ def get_env_value(env_variable):
         error_msg = f'Set the {env_variable} environment variable'
         raise ImproperlyConfigured(error_msg)
 
-
+# Spotify secrets
 SPOTIFY_CLIENT_ID = get_env_value('SPOTIFY_CLIENT_ID')
 SPOTIFY_CLIENT_SECRET = get_env_value('SPOTIFY_CLIENT_SECRET')
 SPOTIFY_AUTH_CODE = get_env_value('SPOTIFY_AUTH_CODE')
 SPOTIFY_CLIENT_SECRET_BASE64 = get_env_value('SPOTIFY_CLIENT_SECRET_BASE64')
 SPOTIFY_ACCESS_TOKEN = get_env_value('SPOTIFY_CLIENT_SECRET_BASE64')
 
+# Database secrets
+DB_HOST = os.getenv('DB_HOST', None)
+DB_NAME = os.getenv('DB_NAME', None)
+DB_USER = os.getenv('DB_USER', None)
+DB_PASSWORD = os.getenv('DB_PASSWORD', None)
 
 # Django Settings
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -28,6 +33,7 @@ SECRET_KEY = '#0&uvflwtp7#lhgv6#69_!^mpaicndx@uz2b%2=b&xy$t7_4&^'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
+PRODUCTION = os.getenv('MUSE_PROD', True)
 
 ALLOWED_HOSTS = ['127.0.0.1', 'localhost']
 FLASK_HOST = 'http://127.0.0.1:5000'
@@ -84,12 +90,25 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'muse.wsgi.application'
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+if PRODUCTION == False:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
     }
-}
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql_psycopg2',
+            'NAME': DB_NAME,
+            'USER': DB_USER,
+            'PASSWORD': DB_PASSWORD,
+            'HOST': DB_HOST,
+            'PORT': '5432'
+        }
+    }
+
 
 
 # Password validation

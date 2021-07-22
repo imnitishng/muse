@@ -1,0 +1,40 @@
+version: '3.4'
+
+services: 
+
+  web:
+    build: 
+      context: musebackendserver
+      dockerfile: Dockerfile
+    working_dir: /muse/muse
+    command: 
+      python manage.py runserver 0.0.0.0:8000
+    ports:
+      - "8000:8000"
+    env_file:
+      - ./.env
+    depends_on: 
+      - db
+      - spiders
+
+  db:
+    image: postgres:13-alpine
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    env_file:
+      - ./.env
+
+  spiders:
+    build: 
+      context: musebackendserver
+      target: spiders
+    working_dir: /muse/muse/spiders/lyricraper
+    command: 
+      ./entrypoint.sh
+    ports:
+      - "6800:6800"
+    env_file:
+      - ./.env
+
+volumes: 
+  postgres_data:
