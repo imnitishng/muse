@@ -19,7 +19,8 @@ testing.*
 
 # Database
 db.sqlite3
-BACKUP_db.sqlite3.bak
+*.bak
+5ksongs*
 twistd.pid
 
 
