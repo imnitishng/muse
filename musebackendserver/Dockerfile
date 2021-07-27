@@ -1,4 +1,4 @@
-# Django
+# Django and scrapyd server
 FROM python:3.7-alpine as base
 
 ENV PYTHONDONTWRITEBYTECODE 1
@@ -18,9 +18,3 @@ RUN mkdir /venvs \
     && pip install -r requirements.txt
 
 COPY . .
-
-# Scrapyd
-FROM base as spiders
-
-# Model Server
-FROM base as mlmodels

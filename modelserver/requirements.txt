@@ -1,0 +1,4 @@
+flask
+tensorflow
+tensorflow-hub
+sentencepiece
