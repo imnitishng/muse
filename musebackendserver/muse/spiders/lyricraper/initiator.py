@@ -3,6 +3,8 @@ from scrapyd_api import ScrapydAPI
 from scrapyd_client.utils import get_config
 
 from .utils import getSongIDsToScrape1
+from muse.settings import SCRAPYD_HOST
+
 
 def run_spiders(all_song_ids, recommendations_obj):
     configure_logging()
@@ -26,6 +28,4 @@ def crawl(song_ids_arg, recommendation_id_hex):
     return spider_job_id
 
 def get_spider_instance():
-    DEFAULT_TARGET_URL = 'http://localhost:6800'
-    target_url = get_config('deploy', 'url', fallback=DEFAULT_TARGET_URL).rstrip('/')
-    return ScrapydAPI(target_url)
+    return ScrapydAPI(SCRAPYD_HOST)

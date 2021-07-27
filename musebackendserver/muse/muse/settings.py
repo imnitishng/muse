@@ -3,7 +3,10 @@ from pathlib import Path
 
 from django.core.exceptions import ImproperlyConfigured
 
-# Get 3rd party environment variables
+
+BASE_DIR = Path(__file__).resolve().parent.parent
+
+# Get mandatory third party environment variables
 def get_env_value(env_variable):
     try:
       	return os.environ[env_variable]
@@ -24,26 +27,43 @@ DB_NAME = os.getenv('DB_NAME', None)
 DB_USER = os.getenv('DB_USER', None)
 DB_PASSWORD = os.getenv('DB_PASSWORD', None)
 
-# Django Settings
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
-BASE_DIR = Path(__file__).resolve().parent.parent
-
-# SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = '#0&uvflwtp7#lhgv6#69_!^mpaicndx@uz2b%2=b&xy$t7_4&^'
 
-# SECURITY WARNING: don't run with debug turned on in production!
+# Production and Debug vars
+# Production mode can only run inside docker containers
 DEBUG = True
 PRODUCTION = os.getenv('MUSE_PROD', True)
+if str(PRODUCTION).lower() in ('false', '0', 'f'):
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
+    }
+    FLASK_HOST = 'http://127.0.0.1:5000'
+    SCRAPYD_HOST = 'http://127.0.0.1:6800'
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql_psycopg2',
+            'NAME': DB_NAME,
+            'USER': DB_USER,
+            'PASSWORD': DB_PASSWORD,
+            'HOST': DB_HOST,
+            'PORT': '5432'
+        }
+    }
+    FLASK_HOST = 'http://modelserver:5000'
+    SCRAPYD_HOST = 'http://spiders:6800'
 
-ALLOWED_HOSTS = ['127.0.0.1', 'localhost']
-FLASK_HOST = 'http://127.0.0.1:5000'
-SCRAPYD_HOST = 'http://127.0.0.1:6800'
-
+# CORS and hosts allowed
+ALLOWED_HOSTS = ['127.0.0.1', 'localhost', '0.0.0.0']
 CORS_ORIGIN_ALLOW_ALL = False
 CORS_ORIGIN_WHITELIST = (
     'http://localhost:3000',
 )
 
+# Apps
 INSTALLED_APPS = [
     'corsheaders',
     'django.contrib.admin',
@@ -90,27 +110,6 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'muse.wsgi.application'
 
-if PRODUCTION == False:
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': BASE_DIR / 'db.sqlite3',
-        }
-    }
-else:
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.postgresql_psycopg2',
-            'NAME': DB_NAME,
-            'USER': DB_USER,
-            'PASSWORD': DB_PASSWORD,
-            'HOST': DB_HOST,
-            'PORT': '5432'
-        }
-    }
-
-
-
 # Password validation
 AUTH_PASSWORD_VALIDATORS = [
     {
@@ -127,7 +126,6 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-
 # Internationalization
 LANGUAGE_CODE = 'en-us'
 TIME_ZONE = 'Asia/Kolkata'
@@ -135,6 +133,6 @@ USE_I18N = True
 USE_L10N = True
 USE_TZ = True
 
-
 # Static files (CSS, JavaScript, Images)
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 STATIC_URL = '/static/'

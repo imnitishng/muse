@@ -1,7 +1,7 @@
 #!/bin/sh
 
-# Remove old scrapy.cfg
-rm scrapy.cfg
+# Remove old scrapy.cfg or pids
+rm scrapy.cfg twistd.pid
 
 # Add new config with docker supported URL
 FILENAME="scrapy.cfg"

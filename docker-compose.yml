@@ -5,12 +5,12 @@ services:
   web:
     build: 
       context: musebackendserver
-      dockerfile: Dockerfile
+      target: base
     working_dir: /muse/muse
     command: 
-      python manage.py runserver 0.0.0.0:8000
-    ports:
-      - "8000:8000"
+      gunicorn muse.wsgi:application --bind 0.0.0.0:8000
+    expose: 
+      - "8000"
     env_file:
       - ./.env
     depends_on: 
@@ -27,7 +27,7 @@ services:
   spiders:
     build: 
       context: musebackendserver
-      target: spiders
+      target: base
     working_dir: /muse/muse/spiders/lyricraper
     command: 
       ./entrypoint.sh
@@ -35,6 +35,24 @@ services:
       - "6800:6800"
     env_file:
       - ./.env
+
+  modelserver:
+    build:
+      context: modelserver
+      dockerfile: Dockerfile
+    working_dir: /modelserver
+    command: 
+      ./startserver.sh
+    expose: 
+      - "5000"
+
+  staticserve:
+    build:
+      context: muse-frontend
+      dockerfile: Dockerfile
+    working_dir: /muse
+    ports:
+      - "1337:80"
 
 volumes: 
   postgres_data:
