@@ -1,6 +1,9 @@
 import axios from 'axios'
+import { getHost  } from '../utils/helper'
 
-const baseURL = 'http://127.0.0.1:8000/api/spiders'
+
+const hostURL = getHost()
+const baseURL = `${hostURL}/api/spiders`
 
 export const startLyricsFetch = async (queryID) => {
   const requestBody = {

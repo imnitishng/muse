@@ -38,7 +38,6 @@ const searchSong = async songName => {
   return response
 }
 
-
 const setNewAccessToken = async () => {
   const response = await getAccessToken()
   const accessToken = response.data.access_token
