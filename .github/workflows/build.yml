@@ -1,0 +1,66 @@
+name: CI - Build docker images
+
+on: 
+  push:
+    branches: [main]
+  pull_request:
+    branches: [master]
+    types: [opened, synchronize]
+
+env:
+  WEB_IMAGE: ghcr.io/$(echo $GITHUB_REPOSITORY | tr '[:upper:]' '[:lower:]')/web
+  DB_IMAGE: ghcr.io/$(echo $GITHUB_REPOSITORY | tr '[:upper:]' '[:lower:]')/db
+  SPIDER_IMAGE: ghcr.io/$(echo $GITHUB_REPOSITORY | tr '[:upper:]' '[:lower:]')/spider
+  MODELSERVER_IMAGE: ghcr.io/$(echo $GITHUB_REPOSITORY | tr '[:upper:]' '[:lower:]')/modelserver
+  REACT_NGINX_IMAGE: ghcr.io/$(echo $GITHUB_REPOSITORY | tr '[:upper:]' '[:lower:]')/react_ngnix
+
+jobs:
+  build:
+    name: Build Docker Images
+    runs-on: ubuntu-18.04
+
+    steps:
+      - name: Checkout master
+        uses: actions/checkout@v2
+
+      - name: Add evironment variales to .env
+        run: |
+          echo PRODUCTION=${{ secrets.PRODUCTION }} >> .env
+          echo SPOTIFY_CLIENT_ID=${{ secrets.SPOTIFY_CLIENT_ID }} >> .env
+          echo SPOTIFY_AUTH_CODE=${{ secrets.SPOTIFY_AUTH_CODE }} >> .env
+          echo SPOTIFY_CLIENT_SECRET_BASE64=${{ secrets.SPOTIFY_CLIENT_SECRET_BASE64 }} >> .env
+          echo SPOTIFY_ACESS_TOKEN=${{ secrets.SPOTIFY_ACESS_TOKEN }} >> .env
+          echo SPOTIFY_CLIENT_SECRET=${{ secrets.SPOTIFY_CLIENT_SECRET }} >> .env
+          echo DB_HOST=${{ secrets.DB_HOST }} >> .env
+          echo DB_NAME=${{ secrets.DB_NAME }} >> .env
+          echo DB_USER=${{ secrets.DB_USER }} >> .env
+          echo DB_PASSWORD=${{ secrets.DB_PASSWORD }} >> .env
+          echo POSTGRES_DB=${{ secrets.POSTGRES_DB }} >> .env
+          echo POSTGRES_USER=${{ secrets.POSTGRES_USER }} >> .env
+          echo POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }} >> .env
+
+      - name: Set environment variables
+        run: |
+          echo "WEB_IMAGE=$(echo ${{ env.WEB_IMAGE }})" >> $GITHUB_ENV 
+          echo "DB_IMAGE=$(echo ${{ env.DB_IMAGE }})" >> $GITHUB_ENV 
+          echo "SPIDER_IMAGE=$(echo ${{ env.SPIDER_IMAGE }})" >> $GITHUB_ENV 
+          echo "MODELSERVER_IMAGE=$(echo ${{ env.MODELSERVER_IMAGE }})" >> $GITHUB_ENV 
+          echo "REACT_NGINX_IMAGE=$(echo ${{ env.REACT_NGINX_IMAGE }})" >> $GITHUB_ENV
+
+      - name: Log in to GitHub Packages
+        run: echo ${PERSONAL_ACCESS_TOKEN} | docker login ghcr.io -u ${{ secrets.NAMESPACE }} --password-stdin 
+        env: 
+          PERSONAL_ACCESS_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+      
+      - name: Build images using docker-compose
+        run: |
+          docker-compose -f docker-compose.yml build
+
+      - name: Push images
+        run: |
+          docker push ${{ env.WEB_IMAGE }}
+          docker push ${{ env.DB_IMAGE }}
+          docker push ${{ env.SPIDER_IMAGE }}
+          docker push ${{ env.MODELSERVER_IMAGE }}
+          docker push ${{ env.REACT_NGINX_IMAGE }}
+ 

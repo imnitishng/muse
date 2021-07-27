@@ -1,7 +1,6 @@
 import scrapy
 import urllib
-import csv, os, json
-import mysql.connector
+import os
 import re
 
 from apps.endpoints.models import Song

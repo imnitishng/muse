@@ -2,7 +2,13 @@ import os
 import sys
 import django
 
-sys.path.append('/home/nitish/Projects/muse/musebackendserver/muse/')
+from pathlib import Path
+
+
+# Path for the django project will always be relative to current file
+django_path = Path(__file__).resolve().parents[3]
+sys.path.append(str(django_path))
+# sys.path.append('/home/nitish/Projects/muse/musebackendserver/muse/')
 os.environ['DJANGO_SETTINGS_MODULE'] = 'muse.settings'
 
 django.setup()
